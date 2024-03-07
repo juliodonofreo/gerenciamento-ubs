@@ -5,20 +5,21 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.3</version>
+		<version>3.2.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.ubs</groupId>
-	<artifactId>ubs</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>ubs</name>
-	<description>Projeto de gerenciamento de ubs</description>
 	<properties>
 		<java.version>17</java.version>
 		<POSTGRES_URL>${env.POSTGRES_URL}</POSTGRES_URL>
 		<POSTGRES_USER>${env.POSTGRES_USER}</POSTGRES_USER>
 		<POSTGRES_PASSWORD>${env.POSTGRES_PASSWORD}</POSTGRES_PASSWORD>
 	</properties>
+	<groupId>com.ubs</groupId>
+	<artifactId>ubs</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>ubs</name>
+	<description>Projeto de gerenciamento de ubs</description>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -76,15 +77,6 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.0.0-M3</version>
-				<configuration>
-					<testFailureIgnore>true</testFailureIgnore>
-					<shutdown>kill</shutdown> <!-- Use it if required-->
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
 
