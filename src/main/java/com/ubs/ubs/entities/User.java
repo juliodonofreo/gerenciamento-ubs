@@ -13,7 +13,7 @@ import java.util.Set;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="usuario_tipo",
         discriminatorType = DiscriminatorType.INTEGER)
-@Table(name = "tb_usuario")
+@Table(name = "tb_user")
 public class User implements UserDetails {
 
     @Id
@@ -28,10 +28,10 @@ public class User implements UserDetails {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "tb_usuario_funcao",
-            joinColumns = @JoinColumn(name = "funcao_id"),
-            inverseJoinColumns = @JoinColumn(name = "usuario_id"))
-    private Set<Role> funcoes = new HashSet<>();
+            name = "tb_user_role",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
 
     public User(){}
 
@@ -42,12 +42,12 @@ public class User implements UserDetails {
         this.senha = senha;
     }
 
-    public void addRole(Role funcao) {
-        funcoes.add(funcao);
+    public void addRole(Role role) {
+        roles.add(role);
     }
 
     public boolean hasRole(String roleName) {
-        for (Role role : funcoes) {
+        for (Role role : roles) {
             if (role.getAuthority().equals(roleName)) {
                 return true;
             }
@@ -88,7 +88,7 @@ public class User implements UserDetails {
     }
 
     public Set<Role> getFuncoes() {
-        return funcoes;
+        return roles;
     }
 
     public Set<Telefone> getTelefones() {
@@ -99,8 +99,8 @@ public class User implements UserDetails {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        User usuario = (User) o;
-        return Objects.equals(id, usuario.id);
+        User user = (User) o;
+        return Objects.equals(id, user.id);
     }
 
     @Override
@@ -109,7 +109,7 @@ public class User implements UserDetails {
     }
 
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return funcoes;
+        return roles;
     }
 
     @Override

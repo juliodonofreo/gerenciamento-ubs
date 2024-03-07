@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name = "tb_funcao")
+@Table(name = "tb_role")
 public class Role implements GrantedAuthority {
 
     @Id
@@ -16,8 +16,8 @@ public class Role implements GrantedAuthority {
     private Long id;
     private String authority;
 
-    @ManyToMany(mappedBy = "funcoes")
-    private Set<User> usuarios = new HashSet<>();
+    @ManyToMany(mappedBy = "roles")
+    private Set<User> users = new HashSet<>();
 
     public Role(){}
 
@@ -42,16 +42,17 @@ public class Role implements GrantedAuthority {
         this.authority = authority;
     }
 
-    public Set<User> getUsuarios() {
-        return usuarios;
+    public Set<User> getUsers() {
+        return users;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Role funcao = (Role) o;
-        return Objects.equals(id, funcao.id);
+
+        Role role = (Role) o;
+        return Objects.equals(id, role.id);
     }
 
     @Override
