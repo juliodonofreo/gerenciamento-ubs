@@ -1,12 +1,12 @@
 package com.ubs.ubs.dtos;
 
-import com.ubs.ubs.entities.Funcao;
+import com.ubs.ubs.entities.Role;
 
 public class FuncaoDTO {
     private Long id;
     private String authority;
 
-    public FuncaoDTO(Funcao entity) {
+    public FuncaoDTO(Role entity) {
         id = entity.getId();
         authority = entity.getAuthority();
     }

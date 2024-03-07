@@ -1,7 +1,7 @@
 package com.ubs.ubs.services;
 
-import com.ubs.ubs.entities.Funcao;
-import com.ubs.ubs.entities.Usuario;
+import com.ubs.ubs.entities.Role;
+import com.ubs.ubs.entities.User;
 import com.ubs.ubs.projections.UserDetailsProjection;
 import com.ubs.ubs.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,11 +25,11 @@ public class UsuarioService implements UserDetailsService {
             throw new UsernameNotFoundException("User not found");
         }
 
-        Usuario user = new Usuario();
+        User user = new User();
         user.setEmail(username);
         user.setSenha(list.get(0).getPassword());
         for (UserDetailsProjection projection : list) {
-            user.addRole(new Funcao(projection.getRoleId(), projection.getAuthority()));
+            user.addRole(new Role(projection.getRoleId(), projection.getAuthority()));
         }
 
         return user;

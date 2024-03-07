@@ -6,7 +6,7 @@ import jakarta.persistence.Entity;
 
 @Entity
 @DiscriminatorValue("2")
-public class Medico extends Usuario{
+public class Medico extends User {
 
     public Especializacao especializacao;
 

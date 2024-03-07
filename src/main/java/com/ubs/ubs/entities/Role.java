@@ -8,20 +8,20 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name = "tb_funcao")
-public class Funcao implements GrantedAuthority {
+@Table(name = "tb_role")
+public class Role implements GrantedAuthority {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String authority;
 
-    @ManyToMany(mappedBy = "funcoes")
-    private Set<Usuario> usuarios = new HashSet<>();
+    @ManyToMany(mappedBy = "roles")
+    private Set<User> users = new HashSet<>();
 
-    public Funcao(){}
+    public Role(){}
 
-    public Funcao(Long id, String authority) {
+    public Role(Long id, String authority) {
         this.id = id;
         this.authority = authority;
     }
@@ -42,16 +42,16 @@ public class Funcao implements GrantedAuthority {
         this.authority = authority;
     }
 
-    public Set<Usuario> getUsuarios() {
-        return usuarios;
+    public Set<User> getUsers() {
+        return users;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Funcao funcao = (Funcao) o;
-        return Objects.equals(id, funcao.id);
+        Role role = (Role) o;
+        return Objects.equals(id, role.id);
     }
 
     @Override

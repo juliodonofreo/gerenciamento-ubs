@@ -1,6 +1,6 @@
 package com.ubs.ubs.repositories;
 
-import com.ubs.ubs.entities.Usuario;
+import com.ubs.ubs.entities.User;
 import com.ubs.ubs.projections.UserDetailsProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -9,13 +9,13 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+public interface UsuarioRepository extends JpaRepository<User, Long> {
     @Query(nativeQuery = true, value = """
-	SELECT tb_usuario.email AS username, tb_usuario.senha, tb_funcao.id AS roleId, tb_funcao.authority
-	FROM tb_usuario
-	INNER JOIN tb_usuario_funcao ON tb_usuario.id = tb_usuario_funcao.usuario_id
-	INNER JOIN tb_funcao ON tb_funcao.id = tb_usuario_funcao.funcao_id
-	WHERE tb_usuario.email = :email
-	""")
+            		SELECT tb_user.email AS username, tb_user.senha, tb_role.id AS roleId, tb_role.authority
+            			FROM tb_user
+            			INNER JOIN tb_user_role ON tb_user.id = tb_user_role.user_id
+            			INNER JOIN tb_role ON tb_role.id = tb_user_role.role_id
+            			WHERE tb_user.email = :email    
+            """)
     List<UserDetailsProjection> searchUserAndRolesByEmail(String email);
 }

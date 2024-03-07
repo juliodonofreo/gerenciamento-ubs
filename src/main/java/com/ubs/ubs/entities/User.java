@@ -13,8 +13,8 @@ import java.util.Set;
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="usuario_tipo",
         discriminatorType = DiscriminatorType.INTEGER)
-@Table(name = "tb_usuario")
-public class Usuario implements UserDetails {
+@Table(name = "tb_user")
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,26 +25,26 @@ public class Usuario implements UserDetails {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "tb_usuario_funcao",
-            joinColumns = @JoinColumn(name = "funcao_id"),
-            inverseJoinColumns = @JoinColumn(name = "usuario_id"))
-    private Set<Funcao> funcoes = new HashSet<>();
+            name = "tb_user_role",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
 
-    public Usuario(){}
+    public User(){}
 
-    public Usuario(Long id, String nome, String email, String senha) {
+    public User(Long id, String nome, String email, String senha) {
         this.id = id;
         this.nome = nome;
         this.email = email;
         this.senha = senha;
     }
 
-    public void addRole(Funcao funcao) {
-        funcoes.add(funcao);
+    public void addRole(Role role) {
+        roles.add(role);
     }
 
     public boolean hasRole(String roleName) {
-        for (Funcao role : funcoes) {
+        for (Role role : roles) {
             if (role.getAuthority().equals(roleName)) {
                 return true;
             }
@@ -84,16 +84,16 @@ public class Usuario implements UserDetails {
         this.senha = senha;
     }
 
-    public Set<Funcao> getFuncoes() {
-        return funcoes;
+    public Set<Role> getFuncoes() {
+        return roles;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Usuario usuario = (Usuario) o;
-        return Objects.equals(id, usuario.id);
+        User user = (User) o;
+        return Objects.equals(id, user.id);
     }
 
     @Override
@@ -102,7 +102,7 @@ public class Usuario implements UserDetails {
     }
 
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return funcoes;
+        return roles;
     }
 
     @Override
