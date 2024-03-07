@@ -3,10 +3,13 @@ package com.ubs.ubs.entities;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name = "tb_usuario")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="usuario_tipo",
+        discriminatorType = DiscriminatorType.INTEGER)
 public class Usuario {
 
     @Id
@@ -79,5 +82,18 @@ public class Usuario {
 
     public Set<Funcao> getFuncoes() {
         return funcoes;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Usuario usuario = (Usuario) o;
+        return Objects.equals(id, usuario.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

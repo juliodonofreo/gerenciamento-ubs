@@ -3,6 +3,7 @@ package com.ubs.ubs.entities;
 import jakarta.persistence.*;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -46,5 +47,18 @@ public class Funcao {
 
     public Set<Usuario> getUsuarios() {
         return usuarios;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Funcao funcao = (Funcao) o;
+        return Objects.equals(id, funcao.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
