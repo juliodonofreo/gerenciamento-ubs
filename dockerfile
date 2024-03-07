@@ -7,7 +7,7 @@ WORKDIR /app
 
 COPY . /app
 
-RUN mvn clean package -Pprod -DskipTests  # Executa o Maven para compilar o projeto
+RUN mvn clean package -Pprod -DskipTests
 
 FROM openjdk:17-jdk-slim
 

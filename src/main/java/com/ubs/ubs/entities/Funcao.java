@@ -1,6 +1,7 @@
 package com.ubs.ubs.entities;
 
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -8,26 +9,22 @@ import java.util.Set;
 
 @Entity
 @Table(name = "tb_funcao")
-public class Funcao {
+public class Funcao implements GrantedAuthority {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long authority;
+    private String authority;
 
     @ManyToMany(mappedBy = "funcoes")
     private Set<Usuario> usuarios = new HashSet<>();
 
-
-
     public Funcao(){}
 
-    public Funcao(Long id, Long authority) {
+    public Funcao(Long id, String authority) {
         this.id = id;
         this.authority = authority;
     }
-
-
 
     public Long getId() {
         return id;
@@ -37,11 +34,11 @@ public class Funcao {
         this.id = id;
     }
 
-    public Long getAuthority() {
+    public String getAuthority() {
         return authority;
     }
 
-    public void setAuthority(Long authority) {
+    public void setAuthority(String authority) {
         this.authority = authority;
     }
 
