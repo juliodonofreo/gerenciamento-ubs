@@ -1,0 +1,23 @@
+[33mcommit d7575f4f0040be288bd968b3b17775299cf335e2[m[33m ([m[1;36mHEAD -> [m[1;32mMAIN[m[33m, [m[1;31morigin/MAIN[m[33m)[m
+Author: juliodonofreo <julio.bibico@hotmail.com>
+Date:   Thu Mar 7 10:51:28 2024 -0300
+
+    Mapemanto de usuário e função
+
+[33mcommit 1c960f8ded14aff70b101f0df0927674ea3c4579[m
+Author: juliodonofreo <julio.bibico@hotmail.com>
+Date:   Thu Mar 7 10:22:14 2024 -0300
+
+    Criando profile de teste
+
+[33mcommit 5b756df040f05225f529f62b0729d1886fc3ffb0[m
+Author: Julio Donofreo <julio.bibico@hotmail.com>
+Date:   Sat Feb 24 19:51:42 2024 -0300
+
+    Adicionando configuração do docker
+
+[33mcommit 4dc6987f596d92b94ddf19741b5b1f966348ff48[m
+Author: Julio Donofreo <julio.bibico@hotmail.com>
+Date:   Sat Feb 24 19:47:58 2024 -0300
+
+    Configuração inicial
