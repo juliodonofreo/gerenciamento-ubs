@@ -16,7 +16,7 @@ public class Usuario {
     private String email;
     private String senha;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "tb_usuario_funcao",
             joinColumns = @JoinColumn(name = "funcao_id"),
@@ -30,6 +30,19 @@ public class Usuario {
         this.nome = nome;
         this.email = email;
         this.senha = senha;
+    }
+
+    public void addRole(Funcao funcao) {
+        funcoes.add(funcao);
+    }
+
+    public boolean hasRole(String roleName) {
+        for (Funcao role : funcoes) {
+            if (role.getAuthority().equals(roleName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public Long getId() {
