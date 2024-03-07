@@ -1,13 +1,13 @@
 package com.ubs.ubs.dtos;
 
-import com.ubs.ubs.entities.Usuario;
+import com.ubs.ubs.entities.User;
 
 public class UsuarioDTO {
     private Long id;
     private String nome;
     private String email;
 
-    public UsuarioDTO(Usuario entity) {
+    public UsuarioDTO(User entity) {
         id = entity.getId();
         nome = entity.getNome();
         email = entity.getEmail();

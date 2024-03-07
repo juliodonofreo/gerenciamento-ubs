@@ -1,6 +1,6 @@
 package com.ubs.ubs.repositories;
 
-import com.ubs.ubs.entities.Usuario;
+import com.ubs.ubs.entities.User;
 import com.ubs.ubs.projections.UserDetailsProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
+public interface UsuarioRepository extends JpaRepository<User, Long> {
     @Query(nativeQuery = true, value = """
 	SELECT tb_usuario.email AS username, tb_usuario.senha, tb_funcao.id AS roleId, tb_funcao.authority
 	FROM tb_usuario

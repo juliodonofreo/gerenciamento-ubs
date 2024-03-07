@@ -9,7 +9,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "tb_funcao")
-public class Funcao implements GrantedAuthority {
+public class Role implements GrantedAuthority {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,11 +17,11 @@ public class Funcao implements GrantedAuthority {
     private String authority;
 
     @ManyToMany(mappedBy = "funcoes")
-    private Set<Usuario> usuarios = new HashSet<>();
+    private Set<User> usuarios = new HashSet<>();
 
-    public Funcao(){}
+    public Role(){}
 
-    public Funcao(Long id, String authority) {
+    public Role(Long id, String authority) {
         this.id = id;
         this.authority = authority;
     }
@@ -42,7 +42,7 @@ public class Funcao implements GrantedAuthority {
         this.authority = authority;
     }
 
-    public Set<Usuario> getUsuarios() {
+    public Set<User> getUsuarios() {
         return usuarios;
     }
 
@@ -50,7 +50,7 @@ public class Funcao implements GrantedAuthority {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Funcao funcao = (Funcao) o;
+        Role funcao = (Role) o;
         return Objects.equals(id, funcao.id);
     }
 

@@ -8,7 +8,7 @@ import java.util.Set;
 
 @Entity
 @DiscriminatorValue("1")
-public class Paciente extends Usuario{
+public class Paciente extends User {
 
     private String cpf;
     private Instant data_nascimento;
@@ -18,7 +18,7 @@ public class Paciente extends Usuario{
             name = "tb_paciente_funcao",
             joinColumns = @JoinColumn(name = "funcao_id"),
             inverseJoinColumns = @JoinColumn(name = "paciente_id"))
-    private Set<Funcao> funcoes = new HashSet<>();
+    private Set<Role> funcoes = new HashSet<>();
 
     public Paciente(){
         super();
@@ -46,7 +46,7 @@ public class Paciente extends Usuario{
         this.data_nascimento = data_nascimento;
     }
 
-    public Set<Funcao> getFuncoes() {
+    public Set<Role> getFuncoes() {
         return funcoes;
     }
 }
