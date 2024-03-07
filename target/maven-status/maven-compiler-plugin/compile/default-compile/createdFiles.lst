@@ -1,1 +1,11 @@
+com\ubs\ubs\entities\Usuario.class
+com\ubs\ubs\entities\Paciente.class
+com\ubs\ubs\entities\Medico.class
+com\ubs\ubs\entities\Funcao.class
+com\ubs\ubs\enums\Especializacao.class
+com\ubs\ubs\repositories\UsuarioRepository.class
+com\ubs\ubs\services\UsuarioService.class
+com\ubs\ubs\dtos\FuncaoDTO.class
 com\ubs\ubs\UbsApplication.class
+com\ubs\ubs\projections\UserDetailsProjection.class
+com\ubs\ubs\dtos\UsuarioDTO.class
