@@ -17,12 +17,16 @@ public class Funcao {
     @ManyToMany(mappedBy = "funcoes")
     private Set<Usuario> usuarios = new HashSet<>();
 
+
+
     public Funcao(){}
 
     public Funcao(Long id, Long authority) {
         this.id = id;
         this.authority = authority;
     }
+
+
 
     public Long getId() {
         return id;
