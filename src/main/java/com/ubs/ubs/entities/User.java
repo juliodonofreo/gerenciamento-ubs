@@ -19,9 +19,9 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String nome;
+    private String name;
     private String email;
-    private String senha;
+    private String password;
 
     @OneToMany(mappedBy = "dono")
     private Set<Telefone> telefones = new HashSet<>();
@@ -35,11 +35,11 @@ public class User implements UserDetails {
 
     public User(){}
 
-    public User(Long id, String nome, String email, String senha) {
+    public User(Long id, String name, String email, String password) {
         this.id = id;
-        this.nome = nome;
+        this.name = name;
         this.email = email;
-        this.senha = senha;
+        this.password = password;
     }
 
     public void addRole(Role role) {
@@ -64,11 +64,11 @@ public class User implements UserDetails {
     }
 
     public String getNome() {
-        return nome;
+        return name;
     }
 
     public void setNome(String nome) {
-        this.nome = nome;
+        this.name = nome;
     }
 
     public String getEmail() {
@@ -79,12 +79,8 @@ public class User implements UserDetails {
         this.email = email;
     }
 
-    public String getSenha() {
-        return senha;
-    }
-
-    public void setSenha(String senha) {
-        this.senha = senha;
+    public void setPassword(String senha) {
+        this.password = senha;
     }
 
     public Set<Role> getFuncoes() {
@@ -114,7 +110,7 @@ public class User implements UserDetails {
 
     @Override
     public String getPassword() {
-        return senha;
+        return password;
     }
 
     @Override

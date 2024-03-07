@@ -3,7 +3,7 @@ package com.ubs.ubs.services;
 import com.ubs.ubs.entities.Role;
 import com.ubs.ubs.entities.User;
 import com.ubs.ubs.projections.UserDetailsProjection;
-import com.ubs.ubs.repositories.UsuarioRepository;
+import com.ubs.ubs.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -16,7 +16,7 @@ import java.util.List;
 public class UsuarioService implements UserDetailsService {
 
     @Autowired
-    private UsuarioRepository repository;
+    private UserRepository repository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -27,7 +27,7 @@ public class UsuarioService implements UserDetailsService {
 
         User user = new User();
         user.setEmail(username);
-        user.setSenha(list.get(0).getPassword());
+        user.setPassword(list.get(0).getPassword());
         for (UserDetailsProjection projection : list) {
             user.addRole(new Role(projection.getRoleId(), projection.getAuthority()));
         }
