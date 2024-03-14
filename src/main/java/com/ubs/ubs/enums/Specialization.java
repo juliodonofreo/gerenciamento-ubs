@@ -1,6 +1,6 @@
 package com.ubs.ubs.enums;
 
-public enum Especializacao {
+public enum Specialization {
     ENFERMEIRO,
     MEDICO
 }

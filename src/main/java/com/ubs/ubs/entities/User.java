@@ -24,7 +24,7 @@ public class User implements UserDetails {
     private String password;
 
     @OneToMany(mappedBy = "dono")
-    private Set<Telefone> telefones = new HashSet<>();
+    private Set<Phone> phones = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -63,12 +63,12 @@ public class User implements UserDetails {
         this.id = id;
     }
 
-    public String getNome() {
+    public String getName() {
         return name;
     }
 
-    public void setNome(String nome) {
-        this.name = nome;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getEmail() {
@@ -83,12 +83,12 @@ public class User implements UserDetails {
         this.password = senha;
     }
 
-    public Set<Role> getFuncoes() {
+    public Set<Role> getRoles() {
         return roles;
     }
 
-    public Set<Telefone> getTelefones() {
-        return telefones;
+    public Set<Phone> getPhones() {
+        return phones;
     }
 
     @Override

@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "tb_telefone")
-public class Telefone {
+public class Phone {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,9 +18,9 @@ public class Telefone {
     @JoinColumn(name = "id_dono")
     private User dono;
 
-    public Telefone() {}
+    public Phone() {}
 
-    public Telefone(Long id, String ddd, String numero, TipoTelefone tipo) {
+    public Phone(Long id, String ddd, String numero, TipoTelefone tipo) {
         this.id = id;
         this.ddd = ddd;
         this.numero = numero;
