@@ -1,0 +1,23 @@
+package com.ubs.ubs.dtos;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+
+public class CustomValidationError extends CustomError{
+
+    private List<ErrorMessage> errors = new ArrayList<>();
+
+
+    public CustomValidationError(Instant timestamp, Integer status, String message, String path) {
+        super(timestamp, status, message, path);
+
+        for (ErrorMessage error : errors) {
+            this.errors.add(error);
+        }
+    }
+
+    public List<ErrorMessage> getErrors() {
+        return errors;
+    }
+}

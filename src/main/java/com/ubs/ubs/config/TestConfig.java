@@ -1,7 +1,10 @@
 package com.ubs.ubs.config;
 
+import com.ubs.ubs.entities.Doctor;
+import com.ubs.ubs.entities.Patient;
 import com.ubs.ubs.entities.Role;
 import com.ubs.ubs.entities.User;
+import com.ubs.ubs.enums.Specialization;
 import com.ubs.ubs.repositories.RoleRepository;
 import com.ubs.ubs.repositories.UserRepository;
 import jakarta.annotation.PostConstruct;
@@ -10,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Instant;
 import java.util.Arrays;
 
 @Configuration
@@ -29,14 +33,18 @@ public class TestConfig {
         userRepository.deleteAll();
         roleRepository.deleteAll();
 
-        User vitor = new User(null, "Vitor", "vitormatheusfv@gmail.com", passwordEncoder.encode("pass123456"));
+        User vitor = new Patient(null, "Vitor", "vitormatheusfv@gmail.com", passwordEncoder.encode("pass123456"), "123456789", Instant.parse("1999-12-12T00:00:00Z"));
+        User pingola = new Doctor(null, "pingoleta", "pingola@gmail.com", passwordEncoder.encode("senha"), Specialization.ENFERMEIRO);
+
         Role roleAdmin = new Role(null, "ROLE_ADMIN");
         Role roleClient = new Role(null, "ROLE_CLIENT");
-        vitor.addRole(roleAdmin);
+
+
         vitor.addRole(roleClient);
+        pingola.addRole(roleAdmin);
 
         roleRepository.saveAll(Arrays.asList(roleAdmin, roleClient));
         userRepository.save(vitor);
-
+        userRepository.save(pingola);
     }
 }
