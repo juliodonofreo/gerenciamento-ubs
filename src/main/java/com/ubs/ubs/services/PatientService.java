@@ -13,6 +13,7 @@ import com.ubs.ubs.projections.UserDetailsProjection;
 import com.ubs.ubs.repositories.PatientRepository;
 import com.ubs.ubs.repositories.RoleRepository;
 import com.ubs.ubs.services.exceptions.CustomNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -54,7 +56,7 @@ public class PatientService{
         return new PatientGetDTO(user);
     }
 
-    public PatientGetDTO insert(PatientInsertDTO dto){
+    public PatientGetDTO insert(@Valid @RequestBody PatientInsertDTO dto){
         dto.setPassword(passwordEncoder.encode(dto.getPassword()));
         Patient user = new Patient(null, dto.getName(), dto.getEmail(), dto.getPassword(), dto.getCpf(), dto.getBirth_date());
         Role roleUser = roleRepository.findById(2L).get();
@@ -63,7 +65,7 @@ public class PatientService{
         return new PatientGetDTO(user);
     }
 
-    public PatientGetDTO update(PatientInsertDTO dto, Authentication authentication){
+    public PatientGetDTO update(@Valid @RequestBody PatientInsertDTO dto, Authentication authentication){
         Jwt jwt = (Jwt) authentication.getPrincipal();
         Patient patient = (Patient) repository.findByEmail(jwt.getClaim("username")).orElseThrow(() -> new CustomNotFoundException("User not found"));
         patient.setName(dto.getName());
