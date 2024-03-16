@@ -8,6 +8,7 @@ import java.time.Instant;
 @DiscriminatorValue("1")
 public class Patient extends User {
 
+    @Column(unique = true)
     private String cpf;
 
     @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")

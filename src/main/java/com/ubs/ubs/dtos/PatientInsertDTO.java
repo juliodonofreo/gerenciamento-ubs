@@ -2,16 +2,17 @@ package com.ubs.ubs.dtos;
 
 import com.ubs.ubs.entities.Patient;
 import jakarta.validation.constraints.PastOrPresent;
+import org.hibernate.validator.constraints.UniqueElements;
 import org.hibernate.validator.constraints.br.CPF;
 
 import java.time.Instant;
 
 public class PatientInsertDTO extends UserInsertDTO {
 
-    @CPF(message = "Invalid CPF")
+    @CPF(message = "CPF inválido.")
     private String cpf;
 
-    @PastOrPresent(message = "The date cannot be in the future")
+    @PastOrPresent(message = "A data não pode ser no futuro.")
     private Instant birth_date;
 
     public PatientInsertDTO() {

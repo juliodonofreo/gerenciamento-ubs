@@ -11,10 +11,10 @@ public class CustomValidationError extends CustomError{
 
     public CustomValidationError(Instant timestamp, Integer status, String message, String path) {
         super(timestamp, status, message, path);
+    }
 
-        for (ErrorMessage error : errors) {
-            this.errors.add(error);
-        }
+    public void addError(String field, String message){
+        errors.add(new ErrorMessage(field, message));
     }
 
     public List<ErrorMessage> getErrors() {

@@ -4,7 +4,9 @@ import com.ubs.ubs.dtos.CustomError;
 import com.ubs.ubs.dtos.CustomValidationError;
 import com.ubs.ubs.services.exceptions.CustomInvalidBodyException;
 import com.ubs.ubs.services.exceptions.CustomNotFoundException;
-import com.ubs.ubs.services.exceptions.CustomValidationException;
+import com.ubs.ubs.services.exceptions.CustomRepeatedException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.Instant;
+import java.util.List;
 
 @ControllerAdvice
 public class ControllerExceptionHandler {
@@ -30,10 +33,22 @@ public class ControllerExceptionHandler {
         return ResponseEntity.status(status).body(error);
     }
 
-    @ExceptionHandler(CustomValidationException.class)
-    public ResponseEntity<CustomError> validation(CustomValidationException e, HttpServletRequest request){
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<CustomError> validation(MethodArgumentNotValidException e, HttpServletRequest request){
         HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
         CustomValidationError error = new CustomValidationError(Instant.now(), status.value(), "Campos inválidos", request.getServletPath());
+
+        List<FieldError> errors = e.getFieldErrors();
+        errors
+                .stream()
+                .forEach(x -> error.addError(x.getField(), x.getDefaultMessage()));
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(CustomRepeatedException.class)
+    public ResponseEntity<CustomError> integrityViolation(CustomRepeatedException e, HttpServletRequest request){
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        CustomError error = new CustomError(Instant.now(), status.value(), e.getMessage(), request.getServletPath());
         return ResponseEntity.status(status).body(error);
     }
 }
