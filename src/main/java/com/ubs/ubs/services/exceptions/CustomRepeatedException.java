@@ -1,15 +1,22 @@
 package com.ubs.ubs.services.exceptions;
 
+import com.ubs.ubs.dtos.ErrorMessage;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class CustomRepeatedException extends RuntimeException{
 
-    String message;
+    List<ErrorMessage> errors = new ArrayList<>();
 
-    public CustomRepeatedException(String message){
-        this.message = message;
+    public CustomRepeatedException(){
     }
 
-    @Override
-    public String getMessage() {
-        return message;
+    public List<ErrorMessage> getErrors() {
+        return errors;
+    }
+
+    public void addError(String field, String message){
+        errors.add(new ErrorMessage(field, message));
     }
 }

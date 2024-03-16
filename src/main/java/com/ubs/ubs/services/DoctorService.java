@@ -6,6 +6,7 @@ import com.ubs.ubs.entities.Doctor;
 import com.ubs.ubs.entities.Role;
 import com.ubs.ubs.repositories.DoctorRepository;
 import com.ubs.ubs.repositories.RoleRepository;
+import com.ubs.ubs.repositories.UserRepository;
 import com.ubs.ubs.services.exceptions.CustomNotFoundException;
 import com.ubs.ubs.services.exceptions.CustomRepeatedException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ public class DoctorService {
     @Autowired
     RoleRepository roleRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Transactional(readOnly = true)
     public Page<DoctorGetDTO> findAll(Pageable pageable){
         Page<Doctor> users = repository.findAll(pageable);
@@ -37,15 +41,20 @@ public class DoctorService {
 
     @Transactional(readOnly = true)
     public DoctorGetDTO findByEmail(String email){
-        Doctor user = repository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found"));
+        Doctor user = repository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("Usuário não encontrado."));
         return new DoctorGetDTO(user);
     }
 
 
     @Transactional(propagation = Propagation.SUPPORTS)
     public DoctorGetDTO insert(DoctorInsertDTO dto){
-        if(repository.findByEmail(dto.getEmail()).isPresent()){
-            throw new CustomRepeatedException("Email já existente. ");
+        CustomRepeatedException error = new CustomRepeatedException();
+        if(userRepository.existsByEmail(dto.getEmail())){
+            error.addError("email", "Email já existente. ");
+        }
+
+        if(!error.getErrors().isEmpty()){
+            throw error;
         }
 
         dto.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -63,17 +72,29 @@ public class DoctorService {
     @Transactional(propagation = Propagation.SUPPORTS)
     public DoctorGetDTO update(DoctorInsertDTO dto, Authentication authentication){
         Jwt jwt = (Jwt) authentication.getPrincipal();
+        CustomRepeatedException error = new CustomRepeatedException();
 
-        if(repository.findByEmail(dto.getEmail()).isPresent() && !dto.getEmail().equals(jwt.getClaim("username"))){
-            throw new CustomRepeatedException("Email já existente. ");
+        if(userRepository.existsByEmail(dto.getEmail()) && !dto.getEmail().equals(jwt.getClaim("username"))){
+            error.addError("email", "Email já existente. ");
         }
 
-        Doctor doctor = (Doctor) repository.findByEmail(jwt.getClaim("username")).orElseThrow(() -> new CustomNotFoundException("User not found"));
+        if(!error.getErrors().isEmpty()){
+            throw error;
+        }
+
+        Doctor doctor = (Doctor) repository.findByEmail(jwt.getClaim("username")).orElseThrow(() -> new CustomNotFoundException("Usuário não encontrado."));
         doctor.setName(dto.getName());
         doctor.setEmail(dto.getEmail());
         doctor.setPassword(passwordEncoder.encode(dto.getPassword()));
         doctor.setSpecialization(dto.getSpecialization());
         return new DoctorGetDTO(repository.save(doctor));
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS)
+    public void delete(Authentication authentication){
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        Doctor doctor = (Doctor) repository.findByEmail(jwt.getClaim("username")).orElseThrow(() -> new CustomNotFoundException("Usuário não encontrado."));
+        repository.delete(doctor);
     }
 
 }

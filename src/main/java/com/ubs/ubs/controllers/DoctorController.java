@@ -49,4 +49,10 @@ public class DoctorController {
         DoctorGetDTO getDto = service.update(dto, authentication);
         return ResponseEntity.ok().body(getDto);
     }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteDoctor(Authentication authentication) {
+        service.delete(authentication);
+        return ResponseEntity.noContent().build();
+    }
 }

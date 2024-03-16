@@ -1,11 +1,9 @@
 package com.ubs.ubs.controllers;
 
-import com.ubs.ubs.dtos.DoctorInsertDTO;
 import com.ubs.ubs.dtos.PatientInsertDTO;
 import com.ubs.ubs.dtos.PatientGetDTO;
 import com.ubs.ubs.dtos.UserGetDTO;
 import com.ubs.ubs.services.PatientService;
-import com.ubs.ubs.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -53,5 +51,11 @@ public class PatientController {
     public ResponseEntity<PatientGetDTO> updatePatient(@Valid @RequestBody PatientInsertDTO dto, Authentication authentication) {
         PatientGetDTO getDto = service.update(dto, authentication);
         return ResponseEntity.ok().body(getDto);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<Void> deleteDoctor(Authentication authentication) {
+        service.delete(authentication);
+        return ResponseEntity.noContent().build();
     }
 }
