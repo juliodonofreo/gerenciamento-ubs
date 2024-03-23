@@ -13,8 +13,10 @@ public class UserInsertDTO {
     @Size(min = 3, message = "O nome deve ter pelo menos 3 carácteres.")
     private String name;
     @Email(message = "Email inválido.")
+    @NotBlank(message = "Campo obrigatório.")
     private String email;
 
+    @NotBlank(message = "Campo obrigatório.")
     private String password;
 
 

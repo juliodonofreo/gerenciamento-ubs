@@ -1,6 +1,8 @@
 package com.ubs.ubs.dtos;
 
 import com.ubs.ubs.entities.Patient;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import org.hibernate.validator.constraints.UniqueElements;
 import org.hibernate.validator.constraints.br.CPF;
@@ -10,9 +12,11 @@ import java.time.Instant;
 public class PatientInsertDTO extends UserInsertDTO {
 
     @CPF(message = "CPF inválido.")
+    @NotBlank(message = "Campo obrigatório.")
     private String cpf;
 
     @PastOrPresent(message = "A data não pode ser no futuro.")
+    @NotNull(message = "Campo obrigatório.")
     private Instant birth_date;
 
     public PatientInsertDTO() {
