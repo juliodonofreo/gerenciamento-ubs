@@ -7,6 +7,7 @@ public class DoctorInsertDTO extends UserInsertDTO {
 
         private Specialization specialization;
 
+
         public DoctorInsertDTO() {
         }
 

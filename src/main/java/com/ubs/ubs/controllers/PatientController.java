@@ -1,5 +1,6 @@
 package com.ubs.ubs.controllers;
 
+import com.ubs.ubs.dtos.AppointmentPatientGetDTO;
 import com.ubs.ubs.dtos.PatientInsertDTO;
 import com.ubs.ubs.dtos.PatientGetDTO;
 import com.ubs.ubs.dtos.UserGetDTO;
@@ -46,6 +47,8 @@ public class PatientController {
                 .toUri();
         return ResponseEntity.created(uri).body(getDto);
     }
+
+
 
     @PutMapping
     public ResponseEntity<PatientGetDTO> updatePatient(@Valid @RequestBody PatientInsertDTO dto, Authentication authentication) {

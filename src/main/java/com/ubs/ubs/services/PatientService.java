@@ -1,6 +1,7 @@
 package com.ubs.ubs.services;
 
 
+import com.ubs.ubs.dtos.AppointmentPatientGetDTO;
 import com.ubs.ubs.dtos.PatientGetDTO;
 import com.ubs.ubs.dtos.PatientInsertDTO;
 import com.ubs.ubs.entities.Patient;
@@ -39,7 +40,6 @@ public class PatientService{
     private UserRepository userRepository;
 
     @Transactional(readOnly = true)
-
     public Page<PatientGetDTO> findAll(Pageable pageable){
         Page<Patient> users = repository.findAll(pageable);
         return users.map(PatientGetDTO::new);
@@ -58,8 +58,8 @@ public class PatientService{
     }
 
 
-    @Transactional(propagation = Propagation.SUPPORTS)
-    public PatientGetDTO insert(@Valid @RequestBody PatientInsertDTO dto){
+    @Transactional
+    public PatientGetDTO insert(@RequestBody PatientInsertDTO dto){
         CustomRepeatedException error = new CustomRepeatedException();
         if(userRepository.existsByEmail(dto.getEmail())){
             error.addError("email", "Email já existente. ");
@@ -80,6 +80,11 @@ public class PatientService{
         user = repository.save(user);
         return new PatientGetDTO(user);
     }
+
+
+
+
+
 
     @Transactional(propagation = Propagation.SUPPORTS)
     public PatientGetDTO update(@Valid @RequestBody PatientInsertDTO dto, Authentication authentication){

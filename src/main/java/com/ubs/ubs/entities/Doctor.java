@@ -1,14 +1,19 @@
 package com.ubs.ubs.entities;
 
 import com.ubs.ubs.enums.Specialization;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @DiscriminatorValue("2")
 public class Doctor extends User {
 
     public Specialization specialization;
+
+    @OneToMany(mappedBy = "doctor")
+    public List<Appointment> appointments = new ArrayList<>();
 
     public Doctor() {
     }
@@ -24,5 +29,9 @@ public class Doctor extends User {
 
     public void setSpecialization(Specialization specialization) {
         this.specialization = specialization;
+    }
+
+    public List<Appointment> getAppointments() {
+        return appointments;
     }
 }

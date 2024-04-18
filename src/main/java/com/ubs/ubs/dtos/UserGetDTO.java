@@ -2,6 +2,8 @@ package com.ubs.ubs.dtos;
 
 import com.ubs.ubs.entities.User;
 
+import java.util.List;
+
 public class UserGetDTO {
     private String name;
     private String email;

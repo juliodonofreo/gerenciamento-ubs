@@ -3,6 +3,8 @@ package com.ubs.ubs.entities;
 import jakarta.persistence.*;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @DiscriminatorValue("1")
@@ -13,6 +15,9 @@ public class Patient extends User {
 
     @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
     private Instant birth_date;
+
+    @OneToMany(mappedBy = "patient")
+    private List<Appointment> appointments = new ArrayList<>();
 
     public Patient(){
         super();
@@ -40,4 +45,7 @@ public class Patient extends User {
         this.birth_date = data_nascimento;
     }
 
+    public List<Appointment> getAppointments() {
+        return appointments;
+    }
 }
