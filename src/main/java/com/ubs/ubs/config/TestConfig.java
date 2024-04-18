@@ -30,11 +30,10 @@ public class TestConfig {
 
     @PostConstruct
     public void init() {
-        userRepository.deleteAll();
         roleRepository.deleteAll();
 
-        User vitor = new Patient(null, "Vitor", "vitormatheusfv@gmail.com", passwordEncoder.encode("pass123456"), "123456789", Instant.parse("1999-12-12T00:00:00Z"));
-        User pingola = new Doctor(null, "pingoleta", "pingola@gmail.com", passwordEncoder.encode("senha"), Specialization.ENFERMEIRO);
+        User vitor = new Patient(null, "Vitor", "vitormatheusfv@gmail.com", passwordEncoder.encode("1234"), "123456789", Instant.parse("1999-12-12T00:00:00Z"));
+        User pingola = new Doctor(null, "pingoleta", "pingola@gmail.com", passwordEncoder.encode("1234"), Specialization.ENFERMEIRO);
 
         Role roleAdmin = new Role(null, "ROLE_ADMIN");
         Role roleClient = new Role(null, "ROLE_CLIENT");
