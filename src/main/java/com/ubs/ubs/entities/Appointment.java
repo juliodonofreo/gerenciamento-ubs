@@ -86,5 +86,4 @@ public class Appointment {
         this.doctor = doctor;
     }
 
-
 }
