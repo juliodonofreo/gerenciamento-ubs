@@ -14,15 +14,15 @@ public class PatientGetMinDTO extends UserGetDTO{
     public PatientGetMinDTO() {
     }
 
-    public PatientGetMinDTO(String name, String email, String cpf, Instant birth_date) {
-        super(name, email);
+    public PatientGetMinDTO(Long id, String name, String email, String cpf, Instant birth_date) {
+        super(id, name, email);
         this.cpf = cpf;
         this.birth_date = birth_date;
 
     }
 
     public PatientGetMinDTO(Patient entity) {
-        super(entity.getName(), entity.getEmail());
+        super(entity.getId(), entity.getName(), entity.getEmail());
         this.cpf = entity.getCpf();
         this.birth_date = entity.getBirth_date();
     }

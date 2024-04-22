@@ -7,20 +7,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DoctorGetMinDTO extends UserGetDTO {
-
     private Specialization specialization;
 
 
     public DoctorGetMinDTO() {
     }
 
-    public DoctorGetMinDTO(String name, String email, Specialization specialization) {
-        super(name, email);
+    public DoctorGetMinDTO(Long id, String name, String email, Specialization specialization) {
+        super(id, name, email);
         this.specialization = specialization;
     }
 
     public DoctorGetMinDTO(Doctor entity) {
-        super(entity.getName(), entity.getEmail());
+        super(entity.getId(), entity.getName(), entity.getEmail());
         this.specialization = entity.getSpecialization();
 
     }
@@ -32,4 +31,5 @@ public class DoctorGetMinDTO extends UserGetDTO {
     public void setSpecialization(Specialization specialization) {
         this.specialization = specialization;
     }
+
 }

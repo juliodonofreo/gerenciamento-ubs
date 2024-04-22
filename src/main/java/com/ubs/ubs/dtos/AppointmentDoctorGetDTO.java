@@ -1,7 +1,7 @@
 package com.ubs.ubs.dtos;
 
 import com.ubs.ubs.entities.Appointment;
-import com.ubs.ubs.entities.AppointmentState;
+import com.ubs.ubs.enums.AppointmentState;
 
 import java.time.Instant;
 
@@ -12,7 +12,7 @@ public class AppointmentDoctorGetDTO {
     private String diagnosis;
     private AppointmentState state;
 
-    private PatientGetMinDTO patient;
+    private DoctorGetMinDTO doctor;
 
     public AppointmentDoctorGetDTO(Long id, Instant date, String diagnosis, AppointmentState state) {
         this.id = id;
@@ -27,7 +27,7 @@ public class AppointmentDoctorGetDTO {
         this.diagnosis = entity.getDiagnosis();
         this.state = entity.getState();
 
-        this.patient = new PatientGetMinDTO(entity.getPatient());
+        this.doctor = new DoctorGetMinDTO(entity.getDoctor());
 
     }
 
@@ -43,8 +43,8 @@ public class AppointmentDoctorGetDTO {
         return diagnosis;
     }
 
-    public PatientGetMinDTO getPatient() {
-        return patient;
+    public DoctorGetMinDTO getDoctor() {
+        return doctor;
     }
 
     public AppointmentState getState() {

@@ -10,8 +10,8 @@ public class AppointmentGetDTO {
     private Instant date;
     private String diagnosis;
 
-    private DoctorGetDTO doctor;
-    private PatientGetDTO patient;
+    private DoctorGetMinDTO doctor;
+    private PatientGetMinDTO patient;
 
     public AppointmentGetDTO(Long id, Instant date, String diagnosis) {
         this.id = id;
@@ -24,8 +24,8 @@ public class AppointmentGetDTO {
         this.date = entity.getDate();
         this.diagnosis = entity.getDiagnosis();
 
-        this.patient = new PatientGetDTO(entity.getPatient());
-        this.doctor = new DoctorGetDTO(entity.getDoctor());
+        this.patient = new PatientGetMinDTO(entity.getPatient());
+        this.doctor = new DoctorGetMinDTO(entity.getDoctor());
     }
 
     public Long getId() {
@@ -40,11 +40,11 @@ public class AppointmentGetDTO {
         return diagnosis;
     }
 
-    public DoctorGetDTO getDoctor() {
+    public DoctorGetMinDTO getDoctor() {
         return doctor;
     }
 
-    public PatientGetDTO getPatient() {
+    public PatientGetMinDTO getPatient() {
         return patient;
     }
 }

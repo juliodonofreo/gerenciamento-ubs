@@ -10,22 +10,22 @@ public class DoctorGetDTO extends UserGetDTO {
 
     private Specialization specialization;
 
-    public List<AppointmentDoctorGetDTO> appointments = new ArrayList<>();
+    public List<AppointmentPatientGetDTO> appointments = new ArrayList<>();
 
     public DoctorGetDTO() {
     }
 
-    public DoctorGetDTO(String name, String email, Specialization specialization) {
-        super(name, email);
+    public DoctorGetDTO(Long id, String name, String email, Specialization specialization) {
+        super(id, name, email);
         this.specialization = specialization;
     }
 
     public DoctorGetDTO(Doctor entity) {
-        super(entity.getName(), entity.getEmail());
+        super(entity.getId(), entity.getName(), entity.getEmail());
         this.specialization = entity.getSpecialization();
 
         entity.getAppointments().forEach((x) -> {
-                    appointments.add(new AppointmentDoctorGetDTO(x));
+                    appointments.add(new AppointmentPatientGetDTO(x));
                 }
         );
     }
@@ -38,11 +38,11 @@ public class DoctorGetDTO extends UserGetDTO {
         this.specialization = specialization;
     }
 
-    public List<AppointmentDoctorGetDTO> getAppointments() {
+    public List<AppointmentPatientGetDTO> getAppointments() {
         return appointments;
     }
 
-    public void setAppointments(List<AppointmentDoctorGetDTO> appointments) {
+    public void setAppointments(List<AppointmentPatientGetDTO> appointments) {
         this.appointments = appointments;
     }
 }

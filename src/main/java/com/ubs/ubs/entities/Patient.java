@@ -19,6 +19,9 @@ public class Patient extends User {
     @OneToMany(mappedBy = "patient")
     private List<Appointment> appointments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "companion")
+    private List<Dependent> dependents = new ArrayList<>();
+
     public Patient(){
         super();
     }
@@ -47,5 +50,9 @@ public class Patient extends User {
 
     public List<Appointment> getAppointments() {
         return appointments;
+    }
+
+    public List<Dependent> getDependents() {
+        return dependents;
     }
 }

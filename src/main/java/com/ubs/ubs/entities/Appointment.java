@@ -1,5 +1,6 @@
 package com.ubs.ubs.entities;
 
+import com.ubs.ubs.enums.AppointmentState;
 import jakarta.persistence.*;
 
 import java.time.Instant;

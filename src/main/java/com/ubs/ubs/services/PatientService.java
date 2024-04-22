@@ -1,11 +1,14 @@
 package com.ubs.ubs.services;
 
 
-import com.ubs.ubs.dtos.AppointmentPatientGetDTO;
+import com.ubs.ubs.dtos.DependentGetDTO;
+import com.ubs.ubs.dtos.DependentInsertDTO;
 import com.ubs.ubs.dtos.PatientGetDTO;
 import com.ubs.ubs.dtos.PatientInsertDTO;
+import com.ubs.ubs.entities.Dependent;
 import com.ubs.ubs.entities.Patient;
 import com.ubs.ubs.entities.Role;
+import com.ubs.ubs.repositories.DependentRepository;
 import com.ubs.ubs.repositories.PatientRepository;
 import com.ubs.ubs.repositories.RoleRepository;
 import com.ubs.ubs.repositories.UserRepository;
@@ -16,12 +19,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.List;
 
 
 @Service
@@ -38,6 +44,12 @@ public class PatientService{
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private DependentRepository dependentRepository;
+
+    @Autowired
+    private UserService userService;
 
     @Transactional(readOnly = true)
     public Page<PatientGetDTO> findAll(Pageable pageable){
@@ -81,21 +93,14 @@ public class PatientService{
         return new PatientGetDTO(user);
     }
 
-
-
-
-
-
     @Transactional(propagation = Propagation.SUPPORTS)
-    public PatientGetDTO update(@Valid @RequestBody PatientInsertDTO dto, Authentication authentication){
-        Jwt jwt = (Jwt) authentication.getPrincipal();
+    public PatientGetDTO update(@Valid @RequestBody PatientInsertDTO dto){
         CustomRepeatedException error = new CustomRepeatedException();
+        Patient patient = (Patient) userService.getCurrentUser();
 
-        if(userRepository.existsByEmail(dto.getEmail()) && !dto.getEmail().equals(jwt.getClaim("username"))){
+        if(userRepository.existsByEmail(dto.getEmail()) && !dto.getEmail().equals(patient.getEmail())){
             error.addError("email", "Email já existente. ");
         }
-
-        Patient patient = (Patient) repository.findByEmail(jwt.getClaim("username")).orElseThrow(() -> new CustomNotFoundException("User not found"));
 
         if (repository.existsByCpf(dto.getCpf()) && !dto.getCpf().equals(patient.getCpf())) {
             error.addError("cpf", "CPF já existente. ");
@@ -114,10 +119,32 @@ public class PatientService{
     }
 
     @Transactional(propagation = Propagation.SUPPORTS)
-    public void delete(Authentication authentication){
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        Patient patient = (Patient) repository.findByEmail(jwt.getClaim("username")).orElseThrow(() -> new CustomNotFoundException("Usuário não encontrado."));
+    public void delete(){
+        Patient patient = (Patient) userService.getCurrentUser();
         repository.delete(patient);
+    }
+
+    @Transactional
+    public PatientGetDTO addDependent(DependentInsertDTO dto){
+        Patient patient = (Patient) userService.getCurrentUser();
+        Dependent dependent = new Dependent();
+
+        dependent.setBirth_date(dto.getBirth_date());
+        dependent.setName(dto.getName());
+        dependent.setCompanion(patient);
+
+        dependent = dependentRepository.save(dependent);
+        patient.getDependents().add(dependent);
+
+        patient = repository.save(patient);
+        return new PatientGetDTO(patient);
+    }
+
+    public List<DependentGetDTO> findAllDependents() {
+        Patient patient = (Patient) userService.getCurrentUser();
+        List<Dependent> dependents = dependentRepository.findByCompanion(patient.getId());
+
+        return dependents.stream().map(DependentGetDTO::new).toList();
     }
 }
 

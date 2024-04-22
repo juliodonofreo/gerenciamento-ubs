@@ -1,9 +1,6 @@
 package com.ubs.ubs.controllers;
 
-import com.ubs.ubs.dtos.AppointmentPatientGetDTO;
-import com.ubs.ubs.dtos.PatientInsertDTO;
-import com.ubs.ubs.dtos.PatientGetDTO;
-import com.ubs.ubs.dtos.UserGetDTO;
+import com.ubs.ubs.dtos.*;
 import com.ubs.ubs.services.PatientService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping(value = "/patients")
@@ -49,16 +47,30 @@ public class PatientController {
     }
 
 
-
     @PutMapping
-    public ResponseEntity<PatientGetDTO> updatePatient(@Valid @RequestBody PatientInsertDTO dto, Authentication authentication) {
-        PatientGetDTO getDto = service.update(dto, authentication);
+    public ResponseEntity<PatientGetDTO> updatePatient(@Valid @RequestBody PatientInsertDTO dto) {
+        PatientGetDTO getDto = service.update(dto);
         return ResponseEntity.ok().body(getDto);
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteDoctor(Authentication authentication) {
-        service.delete(authentication);
+    public ResponseEntity<Void> deleteDoctor() {
+        service.delete();
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/dependents")
+    public ResponseEntity<List<DependentGetDTO>> findAllDependents(){
+        return ResponseEntity.ok().body(service.findAllDependents());
+    }
+
+    @PostMapping("/dependents")
+    public ResponseEntity<UserGetDTO> addDependent(@Valid @RequestBody DependentInsertDTO dto){
+        UserGetDTO getDTO = service.addDependent(dto);
+        URI uri = ServletUriComponentsBuilder
+                .fromCurrentContextPath()
+                .build()
+                .toUri();
+        return ResponseEntity.created(uri).body(getDTO);
     }
 }

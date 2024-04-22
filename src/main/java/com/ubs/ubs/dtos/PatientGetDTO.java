@@ -10,25 +10,31 @@ public class PatientGetDTO extends UserGetDTO{
     private String cpf;
     private Instant birth_date;
 
-    private List<AppointmentPatientGetDTO> appointments = new ArrayList<>();
+    private List<AppointmentDoctorGetDTO> appointments = new ArrayList<>();
+    private List<DependentGetDTO> dependents = new ArrayList<>();
+
 
     public PatientGetDTO() {
     }
 
-    public PatientGetDTO(String name, String email, String cpf, Instant birth_date) {
-        super(name, email);
+    public PatientGetDTO(Long id, String name, String email, String cpf, Instant birth_date) {
+        super(id, name, email);
         this.cpf = cpf;
         this.birth_date = birth_date;
 
     }
 
     public PatientGetDTO(Patient entity) {
-        super(entity.getName(), entity.getEmail());
+        super(entity.getId(), entity.getName(), entity.getEmail());
         this.cpf = entity.getCpf();
         this.birth_date = entity.getBirth_date();
 
         entity.getAppointments().forEach(x ->{
-            appointments.add(new AppointmentPatientGetDTO(x));
+            appointments.add(new AppointmentDoctorGetDTO(x));
+        });
+
+        entity.getDependents().forEach(x ->{
+            dependents.add(new DependentGetDTO(x));
         });
     }
 
@@ -40,8 +46,12 @@ public class PatientGetDTO extends UserGetDTO{
         return birth_date;
     }
 
-    public List<AppointmentPatientGetDTO> getAppointments() {
+    public List<AppointmentDoctorGetDTO> getAppointments() {
         return appointments;
+    }
+
+    public List<DependentGetDTO> getDependents() {
+        return dependents;
     }
 
     @Override

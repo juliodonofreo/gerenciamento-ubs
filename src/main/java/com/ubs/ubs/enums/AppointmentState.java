@@ -1,4 +1,4 @@
-package com.ubs.ubs.entities;
+package com.ubs.ubs.enums;
 
 public enum AppointmentState {
     WAITING,
