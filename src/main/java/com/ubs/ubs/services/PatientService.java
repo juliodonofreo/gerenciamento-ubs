@@ -8,12 +8,14 @@ import com.ubs.ubs.dtos.PatientInsertDTO;
 import com.ubs.ubs.entities.Dependent;
 import com.ubs.ubs.entities.Patient;
 import com.ubs.ubs.entities.Role;
+import com.ubs.ubs.entities.User;
 import com.ubs.ubs.repositories.DependentRepository;
 import com.ubs.ubs.repositories.PatientRepository;
 import com.ubs.ubs.repositories.RoleRepository;
 import com.ubs.ubs.repositories.UserRepository;
 import com.ubs.ubs.services.exceptions.CustomNotFoundException;
 import com.ubs.ubs.services.exceptions.CustomRepeatedException;
+import com.ubs.ubs.services.exceptions.ForbiddenException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -96,7 +98,7 @@ public class PatientService{
     @Transactional(propagation = Propagation.SUPPORTS)
     public PatientGetDTO update(@Valid @RequestBody PatientInsertDTO dto){
         CustomRepeatedException error = new CustomRepeatedException();
-        Patient patient = (Patient) userService.getCurrentUser();
+        Patient patient = getPatientOrForbidden("Usuário não é um paciente.");
 
         if(userRepository.existsByEmail(dto.getEmail()) && !dto.getEmail().equals(patient.getEmail())){
             error.addError("email", "Email já existente. ");
@@ -120,13 +122,13 @@ public class PatientService{
 
     @Transactional(propagation = Propagation.SUPPORTS)
     public void delete(){
-        Patient patient = (Patient) userService.getCurrentUser();
+        Patient patient = getPatientOrForbidden("Usuário não é um paciente.");
         repository.delete(patient);
     }
 
     @Transactional
-    public PatientGetDTO addDependent(DependentInsertDTO dto){
-        Patient patient = (Patient) userService.getCurrentUser();
+    public DependentGetDTO addDependent(DependentInsertDTO dto){
+        Patient patient = getPatientOrForbidden("Usuário não pode inserir dependentes. ");
         Dependent dependent = new Dependent();
 
         dependent.setBirth_date(dto.getBirth_date());
@@ -136,15 +138,53 @@ public class PatientService{
         dependent = dependentRepository.save(dependent);
         patient.getDependents().add(dependent);
 
-        patient = repository.save(patient);
-        return new PatientGetDTO(patient);
+        dependent = dependentRepository.save(dependent);
+        repository.save(patient);
+        return new DependentGetDTO(dependent);
     }
 
     public List<DependentGetDTO> findAllDependents() {
-        Patient patient = (Patient) userService.getCurrentUser();
+        Patient patient = getPatientOrForbidden("Usuário não possui dependentes");
         List<Dependent> dependents = dependentRepository.findByCompanion(patient.getId());
-
         return dependents.stream().map(DependentGetDTO::new).toList();
+    }
+
+    public DependentGetDTO findDependentsById(Long id) {
+        Dependent dependent = dependentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException("Dependente não encontrado."));
+        User user = userService.getCurrentUser();
+
+        userService.validateSelfOrAdmin(user.getId(), dependent.getCompanion().getId(), "Usuário não pode acessar este dependente");
+        return new DependentGetDTO(dependent);
+    }
+
+    public DependentGetDTO updateDependent(Long id, DependentInsertDTO dto){
+        Dependent dependent = dependentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException("Dependente não encontrado."));
+        User user = userService.getCurrentUser();
+
+        userService.validateSelfOrAdmin(user.getId(), dependent.getCompanion().getId(), "Usuário não pode acessar este dependente.");
+
+        dependent.setName(dto.getName());
+        dependent.setBirth_date(dto.getBirth_date());
+        return new DependentGetDTO(dependentRepository.save(dependent));
+    }
+
+    public void deleteDependent(Long id){
+        Dependent dependent = dependentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException("Dependente não encontrado."));
+
+        User user = userService.getCurrentUser();
+        userService.validateSelfOrAdmin(user.getId(), dependent.getCompanion().getId(), "Usuário não pode acessar este dependente.");
+        dependentRepository.delete(dependent);
+    }
+
+
+    private Patient getPatientOrForbidden(String msg){
+        User user = userService.getCurrentUser();
+
+        if (!(user instanceof Patient)){
+            throw new ForbiddenException(msg);
+        }
+
+        return (Patient) user;
     }
 }
 

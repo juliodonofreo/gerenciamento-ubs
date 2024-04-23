@@ -6,6 +6,7 @@ import com.ubs.ubs.dtos.ErrorMessage;
 import com.ubs.ubs.services.exceptions.CustomInvalidBodyException;
 import com.ubs.ubs.services.exceptions.CustomNotFoundException;
 import com.ubs.ubs.services.exceptions.CustomRepeatedException;
+import com.ubs.ubs.services.exceptions.ForbiddenException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -59,4 +60,12 @@ public class ControllerExceptionHandler {
 
         return ResponseEntity.status(status).body(error);
     }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<CustomError> forbidden(ForbiddenException e, HttpServletRequest request){
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        CustomError error = new CustomError(Instant.now(), status.value(), e.getMessage(), request.getServletPath());
+        return ResponseEntity.status(status).body(error);
+    }
 }
+

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -26,12 +27,12 @@ public class PatientController {
         return ResponseEntity.ok().body(service.findAll(pageable));
     }
 
-    //    @GetMapping(value = "/{id}")
+    @GetMapping(value = "/{id}")
     public ResponseEntity<UserGetDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok().body(service.findById(id));
     }
 
-    @GetMapping(value = "/{email}")
+//    @GetMapping(value = "/{email}")
     public ResponseEntity<UserGetDTO> findByEmail(@PathVariable String email) {
         return ResponseEntity.ok().body(service.findByEmail(email));
     }
@@ -59,18 +60,40 @@ public class PatientController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/dependents")
     public ResponseEntity<List<DependentGetDTO>> findAllDependents(){
         return ResponseEntity.ok().body(service.findAllDependents());
     }
 
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/dependents/{id}")
+    public ResponseEntity<DependentGetDTO> findDependentsById(@PathVariable Long id){
+        return ResponseEntity.ok().body(service.findDependentsById(id));
+    }
+
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/dependents")
-    public ResponseEntity<UserGetDTO> addDependent(@Valid @RequestBody DependentInsertDTO dto){
-        UserGetDTO getDTO = service.addDependent(dto);
+    public ResponseEntity<DependentGetDTO> addDependent(@Valid @RequestBody DependentInsertDTO dto){
+        DependentGetDTO getDTO = service.addDependent(dto);
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentContextPath()
-                .build()
+                .buildAndExpand(getDTO.getId())
                 .toUri();
         return ResponseEntity.created(uri).body(getDTO);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping("/dependents/{id}")
+    public ResponseEntity<DependentGetDTO> updateDependent(@PathVariable Long id, @Valid @RequestBody DependentInsertDTO dto){
+        DependentGetDTO getDTO = service.updateDependent(id, dto);
+        return ResponseEntity.ok().body(getDTO);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/dependents/{id}")
+    public ResponseEntity<Void> deleteDependent(@PathVariable Long id){
+        service.deleteDependent(id);
+        return ResponseEntity.noContent().build();
     }
 }

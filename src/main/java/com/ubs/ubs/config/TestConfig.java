@@ -32,7 +32,7 @@ public class TestConfig {
     public void init() {
         roleRepository.deleteAll();
 
-        User vitor = new Patient(null, "Vitor", "vitormatheusfv@gmail.com", passwordEncoder.encode("1234"), "123456789", Instant.parse("1999-12-12T00:00:00Z"));
+        User vitor = new Patient(null, "Vitor", "vitor@gmail.com", passwordEncoder.encode("1234"), "123456789", Instant.parse("1999-12-12T00:00:00Z"));
         User pingola = new Doctor(null, "pingoleta", "pingola@gmail.com", passwordEncoder.encode("1234"), Specialization.ENFERMEIRO);
 
         Role roleAdmin = new Role(null, "ROLE_ADMIN");

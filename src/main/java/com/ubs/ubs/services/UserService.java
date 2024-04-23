@@ -6,6 +6,7 @@ import com.ubs.ubs.projections.UserDetailsProjection;
 import com.ubs.ubs.repositories.RoleRepository;
 import com.ubs.ubs.repositories.UserRepository;
 import com.ubs.ubs.services.exceptions.CustomNotFoundException;
+import com.ubs.ubs.services.exceptions.ForbiddenException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -47,6 +48,12 @@ public class UserService implements UserDetailsService {
         String username = jwt.getClaim("username");
 
         return repository.findByEmail(username).orElseThrow(() -> new CustomNotFoundException("Usuário não encontrado"));
+    }
+
+    public void validateSelfOrAdmin(Long userId, Long toCheckId, String msg){
+        if (!userId.equals(toCheckId) && !getCurrentUser().hasRole("ROLE_ADMIN")){
+            throw new ForbiddenException(msg);
+        }
     }
 
 }
