@@ -1,6 +1,6 @@
 package com.ubs.ubs.entities;
 
-import com.ubs.ubs.enums.TipoTelefone;
+import com.ubs.ubs.entities.enums.TipoTelefone;
 import jakarta.persistence.*;
 
 @Entity

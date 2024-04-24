@@ -4,7 +4,7 @@ import com.ubs.ubs.entities.Doctor;
 import com.ubs.ubs.entities.Patient;
 import com.ubs.ubs.entities.Role;
 import com.ubs.ubs.entities.User;
-import com.ubs.ubs.enums.Specialization;
+import com.ubs.ubs.entities.enums.Specialization;
 import com.ubs.ubs.repositories.RoleRepository;
 import com.ubs.ubs.repositories.UserRepository;
 import jakarta.annotation.PostConstruct;

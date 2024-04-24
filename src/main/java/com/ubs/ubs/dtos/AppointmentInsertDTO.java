@@ -1,13 +1,11 @@
 package com.ubs.ubs.dtos;
 
 import com.ubs.ubs.entities.Appointment;
-import com.ubs.ubs.enums.AppointmentState;
-import jakarta.validation.constraints.FutureOrPresent;
+import com.ubs.ubs.entities.enums.AppointmentState;
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.Length;
 
 
-import javax.print.Doc;
 import java.time.Instant;
 
 public class AppointmentInsertDTO {

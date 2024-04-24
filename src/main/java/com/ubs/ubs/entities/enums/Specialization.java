@@ -1,4 +1,4 @@
-package com.ubs.ubs.enums;
+package com.ubs.ubs.entities.enums;
 
 public enum Specialization {
     ENFERMEIRO,

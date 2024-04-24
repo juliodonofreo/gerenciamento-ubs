@@ -52,6 +52,8 @@ public class PatientService{
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private RoleService roleService;
 
     @Transactional(readOnly = true)
     public Page<PatientGetDTO> findAll(Pageable pageable){
@@ -89,7 +91,7 @@ public class PatientService{
 
         dto.setPassword(passwordEncoder.encode(dto.getPassword()));
         Patient user = new Patient(null, dto.getName(), dto.getEmail(), dto.getPassword(), dto.getCpf(), dto.getBirth_date());
-        Role roleUser = roleRepository.findById(2L).get();
+        Role roleUser = roleRepository.findByAuthority("ROLE_CLIENT").orElse(roleService.createRole("ROLE_CLIENT"));
         user.addRole(roleUser);
         user = repository.save(user);
         return new PatientGetDTO(user);

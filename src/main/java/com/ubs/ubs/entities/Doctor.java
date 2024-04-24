@@ -1,6 +1,6 @@
 package com.ubs.ubs.entities;
 
-import com.ubs.ubs.enums.Specialization;
+import com.ubs.ubs.entities.enums.Specialization;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;

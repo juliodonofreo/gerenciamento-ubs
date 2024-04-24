@@ -1,7 +1,7 @@
 package com.ubs.ubs.dtos;
 
 import com.ubs.ubs.entities.Appointment;
-import com.ubs.ubs.enums.AppointmentState;
+import com.ubs.ubs.entities.enums.AppointmentState;
 
 import java.time.Instant;
 

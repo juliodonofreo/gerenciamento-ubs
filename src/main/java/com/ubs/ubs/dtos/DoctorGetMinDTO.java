@@ -1,10 +1,7 @@
 package com.ubs.ubs.dtos;
 
 import com.ubs.ubs.entities.Doctor;
-import com.ubs.ubs.enums.Specialization;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.ubs.ubs.entities.enums.Specialization;
 
 public class DoctorGetMinDTO extends UserGetDTO {
     private Specialization specialization;

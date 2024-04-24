@@ -33,6 +33,9 @@ public class DoctorService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private RoleService roleService;
+
     @Transactional(readOnly = true)
     public Page<DoctorGetDTO> findAll(Pageable pageable){
         Page<Doctor> users = repository.findAll(pageable);
@@ -60,9 +63,9 @@ public class DoctorService {
         dto.setPassword(passwordEncoder.encode(dto.getPassword()));
         Doctor user = new Doctor(null, dto.getName(), dto.getEmail(), dto.getPassword(), dto.getSpecialization());
 
-        Role roleAdmin = roleRepository.findById(1L).get();
+        Role roleAdmin = roleRepository.findByAuthority("ROLE_ADMIN").orElse(roleService.createRole("ROLE_ADMIN"));
         user.addRole(roleAdmin);
-        Role roleUser = roleRepository.findById(2L).get();
+        Role roleUser = roleRepository.findByAuthority("ROLE_CLIENT").orElse(roleService.createRole("ROLE_CLIENT"));
         user.addRole(roleUser);
 
         user = repository.save(user);
@@ -96,5 +99,4 @@ public class DoctorService {
         Doctor doctor = (Doctor) repository.findByEmail(jwt.getClaim("username")).orElseThrow(() -> new CustomNotFoundException("Usuário não encontrado."));
         repository.delete(doctor);
     }
-
 }

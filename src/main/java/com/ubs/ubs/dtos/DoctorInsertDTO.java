@@ -1,7 +1,7 @@
 package com.ubs.ubs.dtos;
 
 import com.ubs.ubs.entities.Doctor;
-import com.ubs.ubs.enums.Specialization;
+import com.ubs.ubs.entities.enums.Specialization;
 
 public class DoctorInsertDTO extends UserInsertDTO {
 
