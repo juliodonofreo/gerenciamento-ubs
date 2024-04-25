@@ -10,6 +10,6 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
 
     Optional<Patient> findByEmail(String email);
 
-    Patient getPatientByCpf(String cpf);
+    Optional<Patient> getPatientByCpf(String cpf);
     boolean existsByCpf(String cpf);
 }

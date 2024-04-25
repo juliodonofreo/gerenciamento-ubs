@@ -47,20 +47,17 @@ public class AppointmentService {
         appointment.setDiagnosis(dto.getDiagnosis());
         appointment.setState(dto.getState());
 
-        if(user instanceof Patient){
-            Patient patient = (Patient) user;
+        if(user instanceof Patient patient){
             appointment.setPatient(patient);
-            System.out.println(dto.getDoctor());
 
             Doctor doctor = doctorRepository.getReferenceById(dto.getDoctor().getId());
             appointment.setDoctor(doctor);
         }
 
-        if (user instanceof Doctor){
-            Doctor doctor = (Doctor) user;
+        if (user instanceof Doctor doctor){
             appointment.setDoctor(doctor);
 
-            Patient patient = patientRepository.getPatientByCpf(dto.getPatient().getCpf());
+            Patient patient = patientRepository.getPatientByCpf(dto.getPatient().getCpf()).orElseThrow(() -> new CustomNotFoundException("Paciente não encontrado"));
             appointment.setPatient(patient);
         }
 
