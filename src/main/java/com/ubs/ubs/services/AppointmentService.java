@@ -60,7 +60,7 @@ public class AppointmentService {
             Doctor doctor = (Doctor) user;
             appointment.setDoctor(doctor);
 
-            Patient patient = patientRepository.getReferenceById(dto.getPatient().getId());
+            Patient patient = patientRepository.getPatientByCpf(dto.getPatient().getCpf());
             appointment.setPatient(patient);
         }
 
