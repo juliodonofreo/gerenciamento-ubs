@@ -14,7 +14,6 @@ public class AppointmentInsertDTO {
     private Instant date;
 
     @Length(min = 3, message = "O diagnostico deve ter pelo menos 3 caracteres.")
-    @NotBlank
     private String diagnosis;
     private AppointmentState state;
     private PatientInsertDTO patient;
