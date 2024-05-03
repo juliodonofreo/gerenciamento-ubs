@@ -27,22 +27,19 @@ public class PatientController {
         return ResponseEntity.ok().body(service.findAll(pageable));
     }
 
-    @GetMapping(value = "/{id}")
-    public ResponseEntity<UserGetDTO> findById(@PathVariable Long id) {
-        return ResponseEntity.ok().body(service.findById(id));
-    }
 
-//    @GetMapping(value = "/{email}")
-    public ResponseEntity<UserGetDTO> findByEmail(@PathVariable String email) {
-        return ResponseEntity.ok().body(service.findByEmail(email));
+    @GetMapping(value = "/{cpf}")
+    public ResponseEntity<UserGetDTO> findByCpf(@PathVariable String cpf) {
+        return ResponseEntity.ok().body(service.findByCpf(cpf));
     }
 
     @PostMapping
     public ResponseEntity<PatientGetDTO> insert(@Valid @RequestBody PatientInsertDTO dto) {
         PatientGetDTO getDto = service.insert(dto);
         URI uri = ServletUriComponentsBuilder
-                .fromCurrentContextPath()
-                .buildAndExpand(dto.getId())
+                .fromCurrentRequest()
+                .path("/{cpf}")
+                .buildAndExpand(dto.getCpf())
                 .toUri();
         return ResponseEntity.created(uri).body(getDto);
     }

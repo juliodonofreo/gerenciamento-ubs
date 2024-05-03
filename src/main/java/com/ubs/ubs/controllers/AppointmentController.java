@@ -43,4 +43,10 @@ public class AppointmentController {
                 .buildAndExpand(getDTO.getId()).toUri();
         return ResponseEntity.created(uri).body(getDTO);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<AppointmentGetDTO> update(@PathVariable Long id, @RequestBody @Valid AppointmentInsertDTO dto){
+        AppointmentGetDTO getDto = service.update(id, dto);
+        return ResponseEntity.ok().body(getDto);
+    }
 }

@@ -20,10 +20,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,8 +49,15 @@ public class PatientService{
 
     @Autowired
     private UserService userService;
+
     @Autowired
     private RoleService roleService;
+
+    private final String EMAIL_ALREADY_EXISTS = "Email já existente.";
+    private final String CPF_ALREADY_EXISTS = "CPF já existente.";
+    private final String USER_IS_NOT_PATIENT = "Usuário não é um paciente.";
+    private final String DEPENDENT_NOT_FOUND = "Dependente não encontrado.";
+    private final String USER_CANNOT_ACCESS_DEPENDENT = "Usuário não pode acessar este dependente.";
 
     @Transactional(readOnly = true)
     public Page<PatientGetDTO> findAll(Pageable pageable){
@@ -62,27 +66,20 @@ public class PatientService{
     }
 
     @Transactional(readOnly = true)
-    public PatientGetDTO findById(Long id){
-        Patient user = repository.findById(id).orElseThrow(() -> new CustomNotFoundException("User not found"));
+    public PatientGetDTO findByCpf(String cpf){
+        Patient user = repository.getPatientByCpf(cpf).orElseThrow(() -> new CustomNotFoundException("CPF não cadastrado"));
         return new PatientGetDTO(user);
     }
-
-    @Transactional(readOnly = true)
-    public PatientGetDTO findByEmail(String email){
-        Patient user = repository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("User not found"));
-        return new PatientGetDTO(user);
-    }
-
 
     @Transactional
     public PatientGetDTO insert(@RequestBody PatientInsertDTO dto){
         CustomRepeatedException error = new CustomRepeatedException();
         if(userRepository.existsByEmail(dto.getEmail())){
-            error.addError("email", "Email já existente. ");
+            error.addError("email", EMAIL_ALREADY_EXISTS);
         }
 
         if (repository.existsByCpf(dto.getCpf())) {
-            error.addError("cpf", "CPF já existente. ");
+            error.addError("cpf", CPF_ALREADY_EXISTS);
         }
 
         if(!error.getErrors().isEmpty()){
@@ -100,14 +97,14 @@ public class PatientService{
     @Transactional(propagation = Propagation.SUPPORTS)
     public PatientGetDTO update(@Valid @RequestBody PatientInsertDTO dto){
         CustomRepeatedException error = new CustomRepeatedException();
-        Patient patient = getPatientOrForbidden("Usuário não é um paciente.");
+        Patient patient = getPatientOrForbidden(USER_IS_NOT_PATIENT);
 
         if(userRepository.existsByEmail(dto.getEmail()) && !dto.getEmail().equals(patient.getEmail())){
-            error.addError("email", "Email já existente. ");
+            error.addError("email", EMAIL_ALREADY_EXISTS);
         }
 
         if (repository.existsByCpf(dto.getCpf()) && !dto.getCpf().equals(patient.getCpf())) {
-            error.addError("cpf", "CPF já existente. ");
+            error.addError("cpf", CPF_ALREADY_EXISTS);
         }
 
         if (!error.getErrors().isEmpty()) {
@@ -124,7 +121,7 @@ public class PatientService{
 
     @Transactional(propagation = Propagation.SUPPORTS)
     public void delete(){
-        Patient patient = getPatientOrForbidden("Usuário não é um paciente.");
+        Patient patient = getPatientOrForbidden(USER_IS_NOT_PATIENT);
         repository.delete(patient);
     }
 
@@ -152,18 +149,18 @@ public class PatientService{
     }
 
     public DependentGetDTO findDependentsById(Long id) {
-        Dependent dependent = dependentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException("Dependente não encontrado."));
+        Dependent dependent = dependentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(DEPENDENT_NOT_FOUND));
         User user = userService.getCurrentUser();
 
-        userService.validateSelfOrAdmin(user.getId(), dependent.getCompanion().getId(), "Usuário não pode acessar este dependente");
+        userService.validateSelfOrAdmin(user.getId(), dependent.getCompanion().getId(), USER_CANNOT_ACCESS_DEPENDENT);
         return new DependentGetDTO(dependent);
     }
 
     public DependentGetDTO updateDependent(Long id, DependentInsertDTO dto){
-        Dependent dependent = dependentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException("Dependente não encontrado."));
+        Dependent dependent = dependentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(DEPENDENT_NOT_FOUND));
         User user = userService.getCurrentUser();
 
-        userService.validateSelfOrAdmin(user.getId(), dependent.getCompanion().getId(), "Usuário não pode acessar este dependente.");
+        userService.validateSelfOrAdmin(user.getId(), dependent.getCompanion().getId(), USER_CANNOT_ACCESS_DEPENDENT);
 
         dependent.setName(dto.getName());
         dependent.setBirth_date(dto.getBirth_date());
@@ -171,10 +168,10 @@ public class PatientService{
     }
 
     public void deleteDependent(Long id){
-        Dependent dependent = dependentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException("Dependente não encontrado."));
+        Dependent dependent = dependentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(DEPENDENT_NOT_FOUND));
 
         User user = userService.getCurrentUser();
-        userService.validateSelfOrAdmin(user.getId(), dependent.getCompanion().getId(), "Usuário não pode acessar este dependente.");
+        userService.validateSelfOrAdmin(user.getId(), dependent.getCompanion().getId(), USER_CANNOT_ACCESS_DEPENDENT);
         dependentRepository.delete(dependent);
     }
 

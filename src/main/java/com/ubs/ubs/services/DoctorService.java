@@ -36,6 +36,9 @@ public class DoctorService {
     @Autowired
     private RoleService roleService;
 
+    private final String EMAIL_ALREADY_EXISTS = "Email já existente.";
+    private final String USER_NOT_FOUND = "Usuário não encontrado.";
+
     @Transactional(readOnly = true)
     public Page<DoctorGetDTO> findAll(Pageable pageable){
         Page<Doctor> users = repository.findAll(pageable);
@@ -44,7 +47,7 @@ public class DoctorService {
 
     @Transactional(readOnly = true)
     public DoctorGetDTO findByEmail(String email){
-        Doctor user = repository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException("Usuário não encontrado."));
+        Doctor user = repository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException(USER_NOT_FOUND));
         return new DoctorGetDTO(user);
     }
 
@@ -53,7 +56,7 @@ public class DoctorService {
     public DoctorGetDTO insert(DoctorInsertDTO dto){
         CustomRepeatedException error = new CustomRepeatedException();
         if(userRepository.existsByEmail(dto.getEmail())){
-            error.addError("email", "Email já existente. ");
+            error.addError("email", EMAIL_ALREADY_EXISTS);
         }
 
         if(!error.getErrors().isEmpty()){
@@ -78,14 +81,14 @@ public class DoctorService {
         CustomRepeatedException error = new CustomRepeatedException();
 
         if(userRepository.existsByEmail(dto.getEmail()) && !dto.getEmail().equals(jwt.getClaim("username"))){
-            error.addError("email", "Email já existente. ");
+            error.addError("email", EMAIL_ALREADY_EXISTS);
         }
 
         if(!error.getErrors().isEmpty()){
             throw error;
         }
 
-        Doctor doctor = (Doctor) repository.findByEmail(jwt.getClaim("username")).orElseThrow(() -> new CustomNotFoundException("Usuário não encontrado."));
+        Doctor doctor = (Doctor) repository.findByEmail(jwt.getClaim("username")).orElseThrow(() -> new CustomNotFoundException(USER_NOT_FOUND));
         doctor.setName(dto.getName());
         doctor.setEmail(dto.getEmail());
         doctor.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -96,7 +99,7 @@ public class DoctorService {
     @Transactional(propagation = Propagation.SUPPORTS)
     public void delete(Authentication authentication){
         Jwt jwt = (Jwt) authentication.getPrincipal();
-        Doctor doctor = (Doctor) repository.findByEmail(jwt.getClaim("username")).orElseThrow(() -> new CustomNotFoundException("Usuário não encontrado."));
+        Doctor doctor = (Doctor) repository.findByEmail(jwt.getClaim("username")).orElseThrow(() -> new CustomNotFoundException(USER_NOT_FOUND));
         repository.delete(doctor);
     }
 }
