@@ -1,6 +1,6 @@
 package com.ubs.ubs.services;
 
-import com.ubs.ubs.dtos.UserFullDTO;
+import com.ubs.ubs.dtos.*;
 import com.ubs.ubs.entities.Doctor;
 import com.ubs.ubs.entities.Patient;
 import com.ubs.ubs.entities.Role;
@@ -15,6 +15,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,9 @@ public class UserService implements UserDetailsService {
 
     @Autowired
     private UserRepository repository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     private final String USER_NOT_FOUND = "Usuário não encontrado.";
 
@@ -75,6 +79,26 @@ public class UserService implements UserDetailsService {
     public void validateSelfOrAdmin(Long userId, Long toCheckId, String msg){
         if (!userId.equals(toCheckId) && !getCurrentUser().hasRole("ROLE_ADMIN")){
             throw new ForbiddenException(msg);
+        }
+    }
+
+    public void copyDtoToEntity(UserInsertDTO dto, User entity){
+        entity.setName(dto.getName());
+        entity.setEmail(dto.getEmail());
+        entity.setPassword(passwordEncoder.encode(dto.getPassword()));
+    }
+
+    public void copyDtoToEntity(UserUpdateDTO dto, User entity){
+        if (dto.getName() != null && !dto.getName().isEmpty()){
+            entity.setName(dto.getName());
+        }
+
+        if (dto.getEmail() != null && !dto.getEmail().isEmpty()) {
+            entity.setEmail(dto.getEmail());
+        }
+
+        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+            entity.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
     }
 

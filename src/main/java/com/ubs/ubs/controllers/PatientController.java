@@ -46,7 +46,7 @@ public class PatientController {
 
 
     @PutMapping
-    public ResponseEntity<PatientGetDTO> updatePatient(@Valid @RequestBody PatientInsertDTO dto) {
+    public ResponseEntity<PatientGetDTO> updatePatient(@Valid @RequestBody PatientUpdateDTO dto) {
         PatientGetDTO getDto = service.update(dto);
         return ResponseEntity.ok().body(getDto);
     }
