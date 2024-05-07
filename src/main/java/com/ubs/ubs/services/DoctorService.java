@@ -3,12 +3,15 @@ package com.ubs.ubs.services;
 import com.ubs.ubs.dtos.DoctorGetDTO;
 import com.ubs.ubs.dtos.DoctorInsertDTO;
 import com.ubs.ubs.entities.Doctor;
+import com.ubs.ubs.entities.Patient;
 import com.ubs.ubs.entities.Role;
+import com.ubs.ubs.entities.User;
 import com.ubs.ubs.repositories.DoctorRepository;
 import com.ubs.ubs.repositories.RoleRepository;
 import com.ubs.ubs.repositories.UserRepository;
 import com.ubs.ubs.services.exceptions.CustomNotFoundException;
 import com.ubs.ubs.services.exceptions.CustomRepeatedException;
+import com.ubs.ubs.services.exceptions.ForbiddenException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,10 +37,14 @@ public class DoctorService {
     private UserRepository userRepository;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private RoleService roleService;
 
     private final String EMAIL_ALREADY_EXISTS = "Email já existente.";
     private final String USER_NOT_FOUND = "Usuário não encontrado.";
+    private final String USER_IS_NOT_DOCTOR = "Usuário não é um médico.";
 
     @Transactional(readOnly = true)
     public Page<DoctorGetDTO> findAll(Pageable pageable){
@@ -52,7 +59,7 @@ public class DoctorService {
     }
 
 
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional()
     public DoctorGetDTO insert(DoctorInsertDTO dto){
         CustomRepeatedException error = new CustomRepeatedException();
         if(userRepository.existsByEmail(dto.getEmail())){
@@ -63,8 +70,8 @@ public class DoctorService {
             throw error;
         }
 
-        dto.setPassword(passwordEncoder.encode(dto.getPassword()));
-        Doctor user = new Doctor(null, dto.getName(), dto.getEmail(), dto.getPassword(), dto.getSpecialization());
+        Doctor user = new Doctor();
+        copyDtoToEntity(dto, user);
 
         Role roleAdmin = roleRepository.findByAuthority("ROLE_ADMIN").orElse(roleService.createRole("ROLE_ADMIN"));
         user.addRole(roleAdmin);
@@ -75,7 +82,7 @@ public class DoctorService {
         return new DoctorGetDTO(user);
     }
 
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional()
     public DoctorGetDTO update(DoctorInsertDTO dto, Authentication authentication){
         Jwt jwt = (Jwt) authentication.getPrincipal();
         CustomRepeatedException error = new CustomRepeatedException();
@@ -88,18 +95,31 @@ public class DoctorService {
             throw error;
         }
 
-        Doctor doctor = (Doctor) repository.findByEmail(jwt.getClaim("username")).orElseThrow(() -> new CustomNotFoundException(USER_NOT_FOUND));
-        doctor.setName(dto.getName());
-        doctor.setEmail(dto.getEmail());
-        doctor.setPassword(passwordEncoder.encode(dto.getPassword()));
-        doctor.setSpecialization(dto.getSpecialization());
+        Doctor doctor = getDoctorOrForbidden(USER_IS_NOT_DOCTOR);
+        copyDtoToEntity(dto, doctor);
         return new DoctorGetDTO(repository.save(doctor));
     }
 
     @Transactional(propagation = Propagation.SUPPORTS)
-    public void delete(Authentication authentication){
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        Doctor doctor = (Doctor) repository.findByEmail(jwt.getClaim("username")).orElseThrow(() -> new CustomNotFoundException(USER_NOT_FOUND));
+    public void delete(){
+        Doctor doctor = getDoctorOrForbidden(USER_IS_NOT_DOCTOR);
         repository.delete(doctor);
+    }
+
+    private Doctor getDoctorOrForbidden(String msg){
+        User user = userService.getCurrentUser();
+
+        if (!(user instanceof Doctor)){
+            throw new ForbiddenException(msg);
+        }
+
+        return (Doctor) user;
+    }
+
+    private void copyDtoToEntity(DoctorInsertDTO dto, Doctor user) {
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setSpecialization(dto.getSpecialization());
     }
 }

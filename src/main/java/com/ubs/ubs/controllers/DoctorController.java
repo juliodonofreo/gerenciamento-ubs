@@ -51,8 +51,8 @@ public class DoctorController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteDoctor(Authentication authentication) {
-        service.delete(authentication);
+    public ResponseEntity<Void> deleteDoctor() {
+        service.delete();
         return ResponseEntity.noContent().build();
     }
 }

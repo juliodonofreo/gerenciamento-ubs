@@ -21,7 +21,7 @@ public class DoctorGetDTO extends UserGetDTO {
     }
 
     public DoctorGetDTO(Doctor entity) {
-        super(entity.getId(), entity.getName(), entity.getEmail());
+        super(entity);
         this.specialization = entity.getSpecialization();
 
         entity.getAppointments().forEach((x) -> {

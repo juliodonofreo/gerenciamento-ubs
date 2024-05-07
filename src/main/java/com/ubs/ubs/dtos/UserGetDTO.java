@@ -2,6 +2,7 @@ package com.ubs.ubs.dtos;
 
 import com.ubs.ubs.entities.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserGetDTO {
@@ -9,11 +10,17 @@ public class UserGetDTO {
     private String name;
     private String email;
 
+    private final List<RoleDTO> roles = new ArrayList<>();
+
     public UserGetDTO(User entity) {
         id = entity.getId();
         name = entity.getName();
         email = entity.getEmail();
+
+        entity.getRoles().forEach(role -> roles.add(new RoleDTO(role)));
     }
+
+
 
     public UserGetDTO(){}
 
@@ -35,12 +42,7 @@ public class UserGetDTO {
         return email;
     }
 
-    @Override
-    public String toString() {
-        return "UserGetDTO{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                '}';
+    public List<RoleDTO> getRoles() {
+        return roles;
     }
 }

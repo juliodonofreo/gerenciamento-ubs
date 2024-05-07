@@ -1,5 +1,8 @@
 package com.ubs.ubs.services;
 
+import com.ubs.ubs.dtos.UserFullDTO;
+import com.ubs.ubs.entities.Doctor;
+import com.ubs.ubs.entities.Patient;
 import com.ubs.ubs.entities.Role;
 import com.ubs.ubs.entities.User;
 import com.ubs.ubs.projections.UserDetailsProjection;
@@ -40,6 +43,20 @@ public class UserService implements UserDetailsService {
         }
 
         return user;
+    }
+
+    public UserFullDTO currentUserDTO(){
+        User user = getCurrentUser();
+
+        if (user instanceof Patient){
+            return new UserFullDTO((Patient) user);
+        }
+
+        if (user instanceof Doctor){
+            return new UserFullDTO((Doctor) user);
+        }
+
+        return null;
     }
 
     public User getCurrentUser(){

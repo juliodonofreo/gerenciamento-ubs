@@ -86,15 +86,16 @@ public class PatientService{
             throw error;
         }
 
-        dto.setPassword(passwordEncoder.encode(dto.getPassword()));
-        Patient user = new Patient(null, dto.getName(), dto.getEmail(), dto.getPassword(), dto.getCpf(), dto.getBirth_date());
+        Patient user = new Patient();
         Role roleUser = roleRepository.findByAuthority("ROLE_CLIENT").orElse(roleService.createRole("ROLE_CLIENT"));
+
+        copyDtoToEntity(dto, user);
         user.addRole(roleUser);
         user = repository.save(user);
         return new PatientGetDTO(user);
     }
 
-    @Transactional(propagation = Propagation.SUPPORTS)
+    @Transactional
     public PatientGetDTO update(@Valid @RequestBody PatientInsertDTO dto){
         CustomRepeatedException error = new CustomRepeatedException();
         Patient patient = getPatientOrForbidden(USER_IS_NOT_PATIENT);
@@ -111,11 +112,7 @@ public class PatientService{
             throw error;
         }
 
-        patient.setName(dto.getName());
-        patient.setEmail(dto.getEmail());
-        patient.setPassword(passwordEncoder.encode(dto.getPassword()));
-        patient.setCpf(dto.getCpf());
-        patient.setBirth_date(dto.getBirth_date());
+        copyDtoToEntity(dto, patient);
         return new PatientGetDTO(repository.save(patient));
     }
 
@@ -142,12 +139,14 @@ public class PatientService{
         return new DependentGetDTO(dependent);
     }
 
+    @Transactional(readOnly = true)
     public List<DependentGetDTO> findAllDependents() {
         Patient patient = getPatientOrForbidden("Usuário não possui dependentes");
         List<Dependent> dependents = dependentRepository.findByCompanion(patient.getId());
         return dependents.stream().map(DependentGetDTO::new).toList();
     }
 
+    @Transactional(readOnly = true)
     public DependentGetDTO findDependentsById(Long id) {
         Dependent dependent = dependentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(DEPENDENT_NOT_FOUND));
         User user = userService.getCurrentUser();
@@ -156,6 +155,7 @@ public class PatientService{
         return new DependentGetDTO(dependent);
     }
 
+    @Transactional
     public DependentGetDTO updateDependent(Long id, DependentInsertDTO dto){
         Dependent dependent = dependentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(DEPENDENT_NOT_FOUND));
         User user = userService.getCurrentUser();
@@ -184,6 +184,14 @@ public class PatientService{
         }
 
         return (Patient) user;
+    }
+
+    private void copyDtoToEntity(PatientInsertDTO dto, Patient patient){
+        patient.setName(dto.getName());
+        patient.setEmail(dto.getEmail());
+        patient.setPassword(passwordEncoder.encode(dto.getPassword()));
+        patient.setCpf(dto.getCpf());
+        patient.setBirth_date(dto.getBirth_date());
     }
 }
 
