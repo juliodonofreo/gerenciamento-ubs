@@ -1,10 +1,7 @@
 package com.ubs.ubs.services;
 
 
-import com.ubs.ubs.dtos.DependentGetDTO;
-import com.ubs.ubs.dtos.DependentInsertDTO;
-import com.ubs.ubs.dtos.PatientGetDTO;
-import com.ubs.ubs.dtos.PatientInsertDTO;
+import com.ubs.ubs.dtos.*;
 import com.ubs.ubs.entities.Dependent;
 import com.ubs.ubs.entities.Patient;
 import com.ubs.ubs.entities.Role;
@@ -20,7 +17,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,9 +33,6 @@ public class PatientService{
 
     @Autowired
     private RoleRepository roleRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private UserRepository userRepository;
@@ -96,7 +89,7 @@ public class PatientService{
     }
 
     @Transactional
-    public PatientGetDTO update(@Valid @RequestBody PatientInsertDTO dto){
+    public PatientGetDTO update(@RequestBody @Valid PatientUpdateDTO dto){
         CustomRepeatedException error = new CustomRepeatedException();
         Patient patient = getPatientOrForbidden(USER_IS_NOT_PATIENT);
 
@@ -186,12 +179,22 @@ public class PatientService{
         return (Patient) user;
     }
 
-    private void copyDtoToEntity(PatientInsertDTO dto, Patient patient){
-        patient.setName(dto.getName());
-        patient.setEmail(dto.getEmail());
-        patient.setPassword(passwordEncoder.encode(dto.getPassword()));
-        patient.setCpf(dto.getCpf());
-        patient.setBirth_date(dto.getBirth_date());
+    private void copyDtoToEntity(PatientInsertDTO dto, Patient entity){
+        userService.copyDtoToEntity(dto, entity);
+        entity.setCpf(dto.getCpf());
+        entity.setBirth_date(dto.getBirth_date());
+    }
+
+    private void copyDtoToEntity(PatientUpdateDTO dto, Patient entity){
+        userService.copyDtoToEntity(dto, entity);
+
+        if (dto.getCpf() != null && !dto.getCpf().isEmpty()){
+            entity.setCpf(dto.getCpf());
+        }
+
+        if (dto.getBirth_date() != null){
+            entity.setBirth_date(dto.getBirth_date());
+        }
     }
 }
 

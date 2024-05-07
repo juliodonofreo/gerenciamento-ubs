@@ -2,6 +2,7 @@ package com.ubs.ubs.controllers;
 
 import com.ubs.ubs.dtos.DoctorGetDTO;
 import com.ubs.ubs.dtos.DoctorInsertDTO;
+import com.ubs.ubs.dtos.DoctorUpdateDTO;
 import com.ubs.ubs.services.DoctorService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ public class DoctorController {
     }
 
     @PutMapping
-    public ResponseEntity<DoctorGetDTO> updateDoctor(@Valid @RequestBody DoctorInsertDTO dto, Authentication authentication) {
+    public ResponseEntity<DoctorGetDTO> updateDoctor(@Valid @RequestBody DoctorUpdateDTO dto, Authentication authentication) {
         DoctorGetDTO getDto = service.update(dto, authentication);
         return ResponseEntity.ok().body(getDto);
     }
