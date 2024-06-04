@@ -1,5 +1,6 @@
 package com.ubs.ubs.dtos;
 
+import com.ubs.ubs.dtos.utils.ValidationErrorMessages;
 import com.ubs.ubs.entities.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -9,14 +10,14 @@ import org.hibernate.validator.constraints.UniqueElements;
 public class UserInsertDTO {
     private Long id;
 
-    @NotBlank(message = "Campo obrigatório.")
-    @Size(min = 3, message = "O nome deve ter pelo menos 3 carácteres.")
+    @NotBlank(message = ValidationErrorMessages.MANDATORY_FIELD)
+    @Size(min = 3, message = ValidationErrorMessages.INVALID_NAME_LENGTH)
     private String name;
-    @Email(message = "Email inválido.")
-    @NotBlank(message = "Campo obrigatório.")
+    @Email(message = ValidationErrorMessages.INVALID_EMAIL)
+    @NotBlank(message = ValidationErrorMessages.MANDATORY_FIELD)
     private String email;
 
-    @NotBlank(message = "Campo obrigatório.")
+    @NotBlank(message = ValidationErrorMessages.MANDATORY_FIELD)
     private String password;
 
 

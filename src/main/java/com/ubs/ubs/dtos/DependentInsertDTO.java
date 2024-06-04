@@ -1,5 +1,6 @@
 package com.ubs.ubs.dtos;
 
+import com.ubs.ubs.dtos.utils.ValidationErrorMessages;
 import jakarta.validation.constraints.PastOrPresent;
 
 import java.time.Instant;
@@ -8,7 +9,7 @@ public class DependentInsertDTO {
 
     private String name;
 
-    @PastOrPresent(message = "A data não pode ser no futuro.")
+    @PastOrPresent(message = ValidationErrorMessages.DATE_CANNOT_BE_IN_FUTURE)
     private Instant birth_date;
 
     public DependentInsertDTO(){

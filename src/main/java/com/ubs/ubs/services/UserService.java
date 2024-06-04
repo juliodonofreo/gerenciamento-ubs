@@ -21,6 +21,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.ubs.ubs.services.utils.ServiceErrorMessages.USER_NOT_FOUND;
+
 @Service
 public class UserService implements UserDetailsService {
 
@@ -30,7 +32,7 @@ public class UserService implements UserDetailsService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private final String USER_NOT_FOUND = "Usuário não encontrado.";
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

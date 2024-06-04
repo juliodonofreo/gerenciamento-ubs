@@ -10,6 +10,7 @@ public class PatientGetDTO extends UserGetDTO{
     private String cpf;
     private Instant birth_date;
 
+    private AddressGetDTO address;
     private final List<AppointmentDoctorGetDTO> appointments = new ArrayList<>();
     private final List<DependentGetDTO> dependents = new ArrayList<>();
 
@@ -28,6 +29,9 @@ public class PatientGetDTO extends UserGetDTO{
         super(entity);
         this.cpf = entity.getCpf();
         this.birth_date = entity.getBirth_date();
+        if (entity.getAddress() != null){
+            this.address = new AddressGetDTO(entity.getAddress());
+        }
 
         entity.getAppointments().forEach(x ->{
             appointments.add(new AppointmentDoctorGetDTO(x));
@@ -44,6 +48,10 @@ public class PatientGetDTO extends UserGetDTO{
 
     public Instant getBirth_date() {
         return birth_date;
+    }
+
+    public AddressGetDTO getAddress() {
+        return address;
     }
 
     public List<AppointmentDoctorGetDTO> getAppointments() {

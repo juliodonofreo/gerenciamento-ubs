@@ -2,17 +2,12 @@ package com.ubs.ubs.services;
 
 
 import com.ubs.ubs.dtos.*;
-import com.ubs.ubs.entities.Dependent;
-import com.ubs.ubs.entities.Patient;
-import com.ubs.ubs.entities.Role;
-import com.ubs.ubs.entities.User;
-import com.ubs.ubs.repositories.DependentRepository;
-import com.ubs.ubs.repositories.PatientRepository;
-import com.ubs.ubs.repositories.RoleRepository;
-import com.ubs.ubs.repositories.UserRepository;
+import com.ubs.ubs.entities.*;
+import com.ubs.ubs.repositories.*;
 import com.ubs.ubs.services.exceptions.CustomNotFoundException;
 import com.ubs.ubs.services.exceptions.CustomRepeatedException;
 import com.ubs.ubs.services.exceptions.ForbiddenException;
+import com.ubs.ubs.services.utils.ServiceErrorMessages;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -46,11 +41,9 @@ public class PatientService{
     @Autowired
     private RoleService roleService;
 
-    private final String EMAIL_ALREADY_EXISTS = "Email já existente.";
-    private final String CPF_ALREADY_EXISTS = "CPF já existente.";
-    private final String USER_IS_NOT_PATIENT = "Usuário não é um paciente.";
-    private final String DEPENDENT_NOT_FOUND = "Dependente não encontrado.";
-    private final String USER_CANNOT_ACCESS_DEPENDENT = "Usuário não pode acessar este dependente.";
+    @Autowired
+    private AddressRepository addressRepository;
+
 
     @Transactional(readOnly = true)
     public Page<PatientGetDTO> findAll(Pageable pageable){
@@ -68,11 +61,11 @@ public class PatientService{
     public PatientGetDTO insert(@RequestBody PatientInsertDTO dto){
         CustomRepeatedException error = new CustomRepeatedException();
         if(userRepository.existsByEmail(dto.getEmail())){
-            error.addError("email", EMAIL_ALREADY_EXISTS);
+            error.addError("email", ServiceErrorMessages.EMAIL_ALREADY_EXISTS);
         }
 
         if (repository.existsByCpf(dto.getCpf())) {
-            error.addError("cpf", CPF_ALREADY_EXISTS);
+            error.addError("cpf", ServiceErrorMessages.CPF_ALREADY_EXISTS);
         }
 
         if(!error.getErrors().isEmpty()){
@@ -91,14 +84,14 @@ public class PatientService{
     @Transactional
     public PatientGetDTO update(@RequestBody @Valid PatientUpdateDTO dto){
         CustomRepeatedException error = new CustomRepeatedException();
-        Patient patient = getPatientOrForbidden(USER_IS_NOT_PATIENT);
+        Patient patient = getPatientOrForbidden(ServiceErrorMessages.USER_IS_NOT_PATIENT);
 
         if(userRepository.existsByEmail(dto.getEmail()) && !dto.getEmail().equals(patient.getEmail())){
-            error.addError("email", EMAIL_ALREADY_EXISTS);
+            error.addError("email", ServiceErrorMessages.EMAIL_ALREADY_EXISTS);
         }
 
         if (repository.existsByCpf(dto.getCpf()) && !dto.getCpf().equals(patient.getCpf())) {
-            error.addError("cpf", CPF_ALREADY_EXISTS);
+            error.addError("cpf", ServiceErrorMessages.CPF_ALREADY_EXISTS);
         }
 
         if (!error.getErrors().isEmpty()) {
@@ -111,7 +104,7 @@ public class PatientService{
 
     @Transactional(propagation = Propagation.SUPPORTS)
     public void delete(){
-        Patient patient = getPatientOrForbidden(USER_IS_NOT_PATIENT);
+        Patient patient = getPatientOrForbidden(ServiceErrorMessages.USER_IS_NOT_PATIENT);
         repository.delete(patient);
     }
 
@@ -141,30 +134,31 @@ public class PatientService{
 
     @Transactional(readOnly = true)
     public DependentGetDTO findDependentsById(Long id) {
-        Dependent dependent = dependentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(DEPENDENT_NOT_FOUND));
+        Dependent dependent = dependentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(ServiceErrorMessages.DEPENDENT_NOT_FOUND));
         User user = userService.getCurrentUser();
 
-        userService.validateSelfOrAdmin(user.getId(), dependent.getCompanion().getId(), USER_CANNOT_ACCESS_DEPENDENT);
+        userService.validateSelfOrAdmin(user.getId(), dependent.getCompanion().getId(), ServiceErrorMessages.USER_CANNOT_ACCESS_DEPENDENT);
         return new DependentGetDTO(dependent);
     }
 
     @Transactional
     public DependentGetDTO updateDependent(Long id, DependentInsertDTO dto){
-        Dependent dependent = dependentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(DEPENDENT_NOT_FOUND));
+        Dependent dependent = dependentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(ServiceErrorMessages.DEPENDENT_NOT_FOUND));
         User user = userService.getCurrentUser();
 
-        userService.validateSelfOrAdmin(user.getId(), dependent.getCompanion().getId(), USER_CANNOT_ACCESS_DEPENDENT);
+        userService.validateSelfOrAdmin(user.getId(), dependent.getCompanion().getId(), ServiceErrorMessages.USER_CANNOT_ACCESS_DEPENDENT);
 
         dependent.setName(dto.getName());
         dependent.setBirth_date(dto.getBirth_date());
+
         return new DependentGetDTO(dependentRepository.save(dependent));
     }
 
     public void deleteDependent(Long id){
-        Dependent dependent = dependentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(DEPENDENT_NOT_FOUND));
+        Dependent dependent = dependentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(ServiceErrorMessages.DEPENDENT_NOT_FOUND));
 
         User user = userService.getCurrentUser();
-        userService.validateSelfOrAdmin(user.getId(), dependent.getCompanion().getId(), USER_CANNOT_ACCESS_DEPENDENT);
+        userService.validateSelfOrAdmin(user.getId(), dependent.getCompanion().getId(), ServiceErrorMessages.USER_CANNOT_ACCESS_DEPENDENT);
         dependentRepository.delete(dependent);
     }
 
@@ -183,6 +177,20 @@ public class PatientService{
         userService.copyDtoToEntity(dto, entity);
         entity.setCpf(dto.getCpf());
         entity.setBirth_date(dto.getBirth_date());
+        Address address = new Address();
+
+        if (dto.getAddress() == null){
+            return;
+        }
+
+        address.setStreet(dto.getAddress().getStreet());
+        address.setDistrict(dto.getAddress().getDistrict());
+        address.setCep(dto.getAddress().getCep());
+        address.setNumber(dto.getAddress().getNumber());
+        address.setCity(dto.getAddress().getCity());
+
+        addressRepository.save(address);
+        entity.setAddress(address);
     }
 
     private void copyDtoToEntity(PatientUpdateDTO dto, Patient entity){
@@ -195,6 +203,33 @@ public class PatientService{
         if (dto.getBirth_date() != null){
             entity.setBirth_date(dto.getBirth_date());
         }
+
+        if (dto.getAddress() == null){
+            return;
+        }
+
+        if (dto.getAddress().getCep() != null && !dto.getAddress().getCep().isEmpty()){
+            entity.getAddress().setCep(dto.getAddress().getCep());
+        }
+
+        if (dto.getAddress().getCity() != null && !dto.getAddress().getCity().isEmpty()){
+            entity.getAddress().setCity(dto.getAddress().getCity());
+        }
+
+        if (dto.getAddress().getDistrict() != null && !dto.getAddress().getDistrict().isEmpty()){
+            entity.getAddress().setDistrict(dto.getAddress().getDistrict());
+        }
+
+        if (dto.getAddress().getNumber() != null){
+            entity.getAddress().setNumber(dto.getAddress().getNumber());
+        }
+
+        if (dto.getAddress().getStreet() != null && !dto.getAddress().getStreet().isEmpty()){
+            entity.getAddress().setStreet(dto.getAddress().getStreet());
+        }
+
+        addressRepository.save(entity.getAddress());
     }
+
 }
 

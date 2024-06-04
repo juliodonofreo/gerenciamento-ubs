@@ -1,15 +1,16 @@
 package com.ubs.ubs.dtos;
 
+import com.ubs.ubs.dtos.utils.ValidationErrorMessages;
 import com.ubs.ubs.entities.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 
 public class UserUpdateDTO {
 
-    @Size(min = 3, message = "O nome deve ter pelo menos 3 caracteres.")
+    @Size(min = 3, message = ValidationErrorMessages.INVALID_NAME_LENGTH)
     private String name;
 
-    @Email(message = "Email inválido.")
+    @Email(message = ValidationErrorMessages.INVALID_EMAIL)
     private String email;
 
     private String password;

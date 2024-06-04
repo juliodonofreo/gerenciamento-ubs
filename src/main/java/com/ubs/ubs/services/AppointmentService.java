@@ -11,6 +11,7 @@ import com.ubs.ubs.repositories.DoctorRepository;
 import com.ubs.ubs.repositories.PatientRepository;
 import com.ubs.ubs.services.exceptions.CustomNotFoundException;
 import com.ubs.ubs.services.exceptions.ForbiddenException;
+import com.ubs.ubs.services.utils.ServiceErrorMessages;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -31,9 +32,6 @@ public class AppointmentService {
     @Autowired
     private UserService userService;
 
-    private final String DOCTOR_NOT_FOUND = "Médico não encontrado.";
-    private final String PATIENT_NOT_FOUND = "Paciente não encontrado.";
-    private final String APPOINTMENT_NOT_FOUND = "Consulta não encontrada.";
 
     public List<AppointmentGetDTO> findAll(){
         List<Appointment> entities = appointmentRepository.findAll();
@@ -51,14 +49,14 @@ public class AppointmentService {
         if(user instanceof Patient patient){
             appointment.setPatient(patient);
 
-            Doctor doctor = doctorRepository.findByEmail(dto.getDoctor().getEmail()).orElseThrow(() -> new CustomNotFoundException(DOCTOR_NOT_FOUND));
+            Doctor doctor = doctorRepository.findByEmail(dto.getDoctor().getEmail()).orElseThrow(() -> new CustomNotFoundException(ServiceErrorMessages.DOCTOR_NOT_FOUND));
             appointment.setDoctor(doctor);
         }
 
         if (user instanceof Doctor doctor){
             appointment.setDoctor(doctor);
 
-            Patient patient = patientRepository.getPatientByCpf(dto.getPatient().getCpf()).orElseThrow(() -> new CustomNotFoundException(PATIENT_NOT_FOUND));
+            Patient patient = patientRepository.getPatientByCpf(dto.getPatient().getCpf()).orElseThrow(() -> new CustomNotFoundException(ServiceErrorMessages.PATIENT_NOT_FOUND));
             appointment.setPatient(patient);
         }
 
@@ -67,12 +65,12 @@ public class AppointmentService {
     }
 
     public AppointmentGetDTO findById(Long id) {
-        Appointment appointment = appointmentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(APPOINTMENT_NOT_FOUND));
+        Appointment appointment = appointmentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(ServiceErrorMessages.APPOINTMENT_NOT_FOUND));
         return new AppointmentGetDTO(appointment);
     }
 
     public AppointmentGetDTO update(Long id, AppointmentInsertDTO dto) {
-        Appointment entity = appointmentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(APPOINTMENT_NOT_FOUND));
+        Appointment entity = appointmentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(ServiceErrorMessages.APPOINTMENT_NOT_FOUND));
         User currentUser = userService.getCurrentUser();
 
         try {
@@ -90,12 +88,12 @@ public class AppointmentService {
         entity.setState(dto.getState());
 
         if (dto.getDoctor() != null && dto.getDoctor().getEmail() != null){
-            Doctor doctor = doctorRepository.findByEmail(dto.getDoctor().getEmail()).orElseThrow(()-> new CustomNotFoundException(DOCTOR_NOT_FOUND));
+            Doctor doctor = doctorRepository.findByEmail(dto.getDoctor().getEmail()).orElseThrow(()-> new CustomNotFoundException(ServiceErrorMessages.DOCTOR_NOT_FOUND));
             entity.setDoctor(doctor);
         }
 
         if (dto.getPatient() != null && dto.getPatient().getCpf() != null){
-            Patient patient = patientRepository.getPatientByCpf(dto.getPatient().getCpf()).orElseThrow(()-> new CustomNotFoundException(PATIENT_NOT_FOUND));
+            Patient patient = patientRepository.getPatientByCpf(dto.getPatient().getCpf()).orElseThrow(()-> new CustomNotFoundException(ServiceErrorMessages.PATIENT_NOT_FOUND));
             entity.setPatient(patient);
         }
 

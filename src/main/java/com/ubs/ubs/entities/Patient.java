@@ -16,6 +16,10 @@ public class Patient extends User {
     @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
     private Instant birth_date;
 
+    @OneToOne
+    @JoinColumn(name = "address_id")
+    private Address address;
+
     @OneToMany(mappedBy = "patient")
     private List<Appointment> appointments = new ArrayList<>();
 
@@ -46,6 +50,14 @@ public class Patient extends User {
 
     public void setBirth_date(Instant data_nascimento) {
         this.birth_date = data_nascimento;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
     }
 
     public List<Appointment> getAppointments() {

@@ -12,6 +12,7 @@ import com.ubs.ubs.repositories.UserRepository;
 import com.ubs.ubs.services.exceptions.CustomNotFoundException;
 import com.ubs.ubs.services.exceptions.CustomRepeatedException;
 import com.ubs.ubs.services.exceptions.ForbiddenException;
+import com.ubs.ubs.services.utils.ServiceErrorMessages;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,9 +39,6 @@ public class DoctorService {
     @Autowired
     private RoleService roleService;
 
-    private final String EMAIL_ALREADY_EXISTS = "Email já existente.";
-    private final String USER_NOT_FOUND = "Usuário não encontrado.";
-    private final String USER_IS_NOT_DOCTOR = "Usuário não é um médico.";
 
     @Transactional(readOnly = true)
     public Page<DoctorGetDTO> findAll(Pageable pageable){
@@ -50,7 +48,7 @@ public class DoctorService {
 
     @Transactional(readOnly = true)
     public DoctorGetDTO findByEmail(String email){
-        Doctor user = repository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException(USER_NOT_FOUND));
+        Doctor user = repository.findByEmail(email).orElseThrow(() -> new CustomNotFoundException(ServiceErrorMessages.USER_NOT_FOUND));
         return new DoctorGetDTO(user);
     }
 
@@ -59,7 +57,7 @@ public class DoctorService {
     public DoctorGetDTO insert(DoctorInsertDTO dto){
         CustomRepeatedException error = new CustomRepeatedException();
         if(userRepository.existsByEmail(dto.getEmail())){
-            error.addError("email", EMAIL_ALREADY_EXISTS);
+            error.addError("email", ServiceErrorMessages.EMAIL_ALREADY_EXISTS);
         }
 
         if(!error.getErrors().isEmpty()){
@@ -84,21 +82,21 @@ public class DoctorService {
         CustomRepeatedException error = new CustomRepeatedException();
 
         if(userRepository.existsByEmail(dto.getEmail()) && !dto.getEmail().equals(jwt.getClaim("username"))){
-            error.addError("email", EMAIL_ALREADY_EXISTS);
+            error.addError("email", ServiceErrorMessages.EMAIL_ALREADY_EXISTS);
         }
 
         if(!error.getErrors().isEmpty()){
             throw error;
         }
 
-        Doctor doctor = getDoctorOrForbidden(USER_IS_NOT_DOCTOR);
+        Doctor doctor = getDoctorOrForbidden(ServiceErrorMessages.USER_IS_NOT_DOCTOR);
         copyDtoToEntity(dto, doctor);
         return new DoctorGetDTO(repository.save(doctor));
     }
 
     @Transactional(propagation = Propagation.SUPPORTS)
     public void delete(){
-        Doctor doctor = getDoctorOrForbidden(USER_IS_NOT_DOCTOR);
+        Doctor doctor = getDoctorOrForbidden(ServiceErrorMessages.USER_IS_NOT_DOCTOR);
         repository.delete(doctor);
     }
 

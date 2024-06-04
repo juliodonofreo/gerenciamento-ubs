@@ -1,6 +1,6 @@
 package com.ubs.ubs.entities;
 
-import com.ubs.ubs.entities.enums.TipoTelefone;
+import com.ubs.ubs.entities.enums.PhoneType;
 import jakarta.persistence.*;
 
 @Entity
@@ -12,7 +12,7 @@ public class Phone {
     private Long id;
     private String ddd;
     private String numero;
-    private TipoTelefone tipo;
+    private PhoneType tipo;
 
     @ManyToOne
     @JoinColumn(name = "id_dono")
@@ -20,7 +20,7 @@ public class Phone {
 
     public Phone() {}
 
-    public Phone(Long id, String ddd, String numero, TipoTelefone tipo) {
+    public Phone(Long id, String ddd, String numero, PhoneType tipo) {
         this.id = id;
         this.ddd = ddd;
         this.numero = numero;
@@ -51,11 +51,11 @@ public class Phone {
         this.numero = numero;
     }
 
-    public TipoTelefone getTipo() {
+    public PhoneType getTipo() {
         return tipo;
     }
 
-    public void setTipo(TipoTelefone tipo) {
+    public void setTipo(PhoneType tipo) {
         this.tipo = tipo;
     }
 

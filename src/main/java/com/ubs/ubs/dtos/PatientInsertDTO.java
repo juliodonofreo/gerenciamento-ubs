@@ -1,6 +1,8 @@
 package com.ubs.ubs.dtos;
 
+import com.ubs.ubs.dtos.utils.ValidationErrorMessages;
 import com.ubs.ubs.entities.Patient;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
@@ -11,13 +13,16 @@ import java.time.Instant;
 
 public class PatientInsertDTO extends UserInsertDTO {
 
-    @CPF(message = "CPF inválido.")
-    @NotBlank(message = "Campo obrigatório.")
+    @CPF(message = ValidationErrorMessages.INVALID_CPF)
+    @NotBlank(message = ValidationErrorMessages.MANDATORY_FIELD)
     private String cpf;
 
-    @PastOrPresent(message = "A data não pode ser no futuro.")
-    @NotNull(message = "Campo obrigatório.")
+    @PastOrPresent(message = ValidationErrorMessages.DATE_CANNOT_BE_IN_FUTURE)
+    @NotNull(message = ValidationErrorMessages.MANDATORY_FIELD)
     private Instant birth_date;
+
+    @Valid
+    private AddressInsertDTO address;
 
     public PatientInsertDTO() {
     }
@@ -32,6 +37,10 @@ public class PatientInsertDTO extends UserInsertDTO {
         super(entity.getId(), entity.getName(), entity.getEmail(), entity.getPassword());
         cpf = entity.getCpf();
         birth_date = entity.getBirth_date();
+
+        if (entity.getAddress() != null){
+            address = new AddressInsertDTO(entity.getAddress());
+        }
     }
 
     public String getCpf() {
@@ -40,5 +49,9 @@ public class PatientInsertDTO extends UserInsertDTO {
 
     public Instant getBirth_date() {
         return birth_date;
+    }
+
+    public AddressInsertDTO getAddress() {
+        return address;
     }
 }

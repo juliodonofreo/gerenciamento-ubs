@@ -1,6 +1,6 @@
 package com.ubs.ubs.entities.enums;
 
-public enum TipoTelefone {
+public enum PhoneType {
     FIXO,
     MOVEL
 }

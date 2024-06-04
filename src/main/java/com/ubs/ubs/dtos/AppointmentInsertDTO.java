@@ -1,8 +1,8 @@
 package com.ubs.ubs.dtos;
 
+import com.ubs.ubs.dtos.utils.ValidationErrorMessages;
 import com.ubs.ubs.entities.Appointment;
 import com.ubs.ubs.entities.enums.AppointmentState;
-import jakarta.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.Length;
 
 
@@ -13,7 +13,7 @@ public class AppointmentInsertDTO {
     private Long id;
     private Instant date;
 
-    @Length(min = 3, message = "O diagnostico deve ter pelo menos 3 caracteres.")
+    @Length(min = 3, message = ValidationErrorMessages.INVALID_DIAGNOSIS_LENGTH)
     private String diagnosis;
     private AppointmentState state;
     private PatientInsertDTO patient;
