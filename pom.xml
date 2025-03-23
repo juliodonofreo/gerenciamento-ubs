@@ -14,6 +14,8 @@
 		<POSTGRES_USER>${env.POSTGRES_USER}</POSTGRES_USER>
 		<POSTGRES_PASSWORD>${env.POSTGRES_PASSWORD}</POSTGRES_PASSWORD>
 		<POSTGRES_DATABASE>${env.POSTGRES_DATABASE}</POSTGRES_DATABASE>
+		<maven.compiler.source>19</maven.compiler.source>
+		<maven.compiler.target>19</maven.compiler.target>
 	</properties>
 	<groupId>com.ubs</groupId>
 	<artifactId>ubs</artifactId>
@@ -68,6 +70,19 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+
+		<!-- Email -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+
+		<!-- SMS (Twilio) -->
+		<dependency>
+			<groupId>com.twilio.sdk</groupId>
+			<artifactId>twilio</artifactId>
+			<version>9.2.5</version>
 		</dependency>
 
 		<!--

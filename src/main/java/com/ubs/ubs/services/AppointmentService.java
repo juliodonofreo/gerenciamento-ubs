@@ -13,8 +13,14 @@ import com.ubs.ubs.services.exceptions.CustomNotFoundException;
 import com.ubs.ubs.services.exceptions.ForbiddenException;
 import com.ubs.ubs.services.utils.ServiceErrorMessages;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Service
@@ -31,6 +37,9 @@ public class AppointmentService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private EmailService emailService;
 
 
     public List<AppointmentGetDTO> findAll(){
@@ -100,5 +109,36 @@ public class AppointmentService {
         entity = appointmentRepository.save(entity);
 
         return new AppointmentGetDTO(entity);
+    }
+
+    @Scheduled(cron = "0 0 8 * * *")
+    public void checkAndSendAppointmentReminders() {
+        System.out.println("ENVIANDO EMAIL");
+        LocalDateTime tomorrow = LocalDateTime.now().plusDays(1);
+        Instant start = LocalDateTime.now().plusDays(1).withHour(0).withMinute(0)
+                .atZone(ZoneId.systemDefault()).toInstant();
+
+        Instant end = LocalDateTime.now().plusDays(1).withHour(23).withMinute(59)
+                .atZone(ZoneId.systemDefault()).toInstant();
+
+        List<Appointment> appointments = appointmentRepository.findByDateBetween(start, end);
+        System.out.println("Consultas: " + appointments);
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+        for (Appointment appointment : appointments) {
+            Patient patient = appointment.getPatient();
+            Doctor doctor = appointment.getDoctor();
+            ZonedDateTime zonedDateTime = appointment.getDate().atZone(ZoneId.systemDefault());
+            String formattedDate = zonedDateTime.format(formatter);
+
+            // Enviar email
+            emailService.sendAppointmentReminder(
+                    patient.getEmail(),
+                    patient.getName(),
+                    doctor.getName(),
+                    formattedDate
+            );
+        }
     }
 }
