@@ -17,6 +17,7 @@ public class Appointment {
     private Instant date;
     private String diagnosis;
     private AppointmentState state;
+    private String type;
 
     @ManyToOne
     @JoinColumn(name = "patient_id")
@@ -69,6 +70,14 @@ public class Appointment {
 
     public void setState(AppointmentState state) {
         this.state = state;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public Patient getPatient() {

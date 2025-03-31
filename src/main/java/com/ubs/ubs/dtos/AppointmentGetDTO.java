@@ -11,15 +11,17 @@ public class AppointmentGetDTO {
     private Instant date;
     private String diagnosis;
     private AppointmentState state;
+    private String type;
 
     private DoctorGetMinDTO doctor;
     private PatientGetMinDTO patient;
 
-    public AppointmentGetDTO(Long id, Instant date, String diagnosis, AppointmentState state) {
+    public AppointmentGetDTO(Long id, Instant date, String diagnosis, AppointmentState state, String type) {
         this.id = id;
         this.date = date;
         this.diagnosis = diagnosis;
         this.state = state;
+        this.type = type;
     }
 
     public AppointmentGetDTO(Appointment entity) {
@@ -27,6 +29,7 @@ public class AppointmentGetDTO {
         this.date = entity.getDate();
         this.diagnosis = entity.getDiagnosis();
         this.state = entity.getState();
+        this.type = entity.getType();
 
         this.patient = new PatientGetMinDTO(entity.getPatient());
         this.doctor = new DoctorGetMinDTO(entity.getDoctor());
@@ -46,6 +49,11 @@ public class AppointmentGetDTO {
 
     public AppointmentState getState() {
         return state;
+    }
+
+
+    public String getType(){
+        return type;
     }
 
     public DoctorGetMinDTO getDoctor() {

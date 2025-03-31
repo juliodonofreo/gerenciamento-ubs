@@ -54,6 +54,7 @@ public class AppointmentService {
         appointment.setDate(dto.getDate());
         appointment.setDiagnosis(dto.getDiagnosis());
         appointment.setState(dto.getState());
+        appointment.setType(dto.getType());
 
         if(user instanceof Patient patient){
             appointment.setPatient(patient);
@@ -95,6 +96,7 @@ public class AppointmentService {
 
         entity.setDate(dto.getDate());
         entity.setState(dto.getState());
+        entity.setType(dto.getType());
 
         if (dto.getDoctor() != null && dto.getDoctor().getEmail() != null){
             Doctor doctor = doctorRepository.findByEmail(dto.getDoctor().getEmail()).orElseThrow(()-> new CustomNotFoundException(ServiceErrorMessages.DOCTOR_NOT_FOUND));
