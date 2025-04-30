@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@DiscriminatorValue("1")
+@DiscriminatorValue("PATIENT")
 public class Patient extends User {
 
     @Column(unique = true)

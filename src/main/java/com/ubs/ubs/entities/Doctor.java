@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@DiscriminatorValue("2")
+@DiscriminatorValue("DOCTOR")
 public class Doctor extends User {
 
     public Specialization specialization;

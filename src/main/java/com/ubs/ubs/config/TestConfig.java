@@ -19,6 +19,7 @@ import java.util.Arrays;
 @Configuration
 @Profile("test")
 public class TestConfig {
+
     @Autowired
     private UserRepository userRepository;
 
@@ -31,19 +32,51 @@ public class TestConfig {
     @PostConstruct
     public void init() {
         roleRepository.deleteAll();
+        userRepository.deleteAll();
 
-        User vitor = new Patient(null, "Vitor", "vitor@gmail.com", passwordEncoder.encode("1234"), "123456789", Instant.parse("1999-12-12T00:00:00Z"));
-        User pingola = new Doctor(null, "pingoleta", "pingola@gmail.com", passwordEncoder.encode("1234"), Specialization.ENFERMEIRO);
-
+        // Cria todos os perfis em inglês
         Role roleAdmin = new Role(null, "ROLE_ADMIN");
-        Role roleClient = new Role(null, "ROLE_CLIENT");
+        Role roleStaff = new Role(null, "ROLE_STAFF");
+        Role roleDoctor = new Role(null, "ROLE_DOCTOR");
+        Role rolePatient = new Role(null, "ROLE_PATIENT");
+        Role roleUnit = new Role(null, "ROLE_UNIT");
 
+        roleRepository.saveAll(Arrays.asList(
+                roleAdmin,
+                roleStaff,
+                roleDoctor,
+                rolePatient,
+                roleUnit
+        ));
 
-        vitor.addRole(roleClient);
-        pingola.addRole(roleAdmin);
+        // Cria usuários de teste
+        User patient = new Patient(
+                null,
+                "John Doe",
+                "patient@test.com",
+                passwordEncoder.encode("maria"),
+                "123456789",
+                Instant.parse("1990-05-15T00:00:00Z")
+        );
+        patient.addRole(rolePatient);
 
-        roleRepository.saveAll(Arrays.asList(roleAdmin, roleClient));
-        userRepository.save(vitor);
-        userRepository.save(pingola);
+        User doctor = new Doctor(
+                null,
+                "Dr. Smith",
+                "doctor@test.com",
+                passwordEncoder.encode("maria"),
+                Specialization.CARDIOLOGIA
+        );
+        doctor.addRole(roleDoctor);
+
+        User admin = new User(
+                null,
+                "Admin User",
+                "admin@admin.com",
+                passwordEncoder.encode("maria")
+        );
+        admin.addRole(roleAdmin);
+
+        userRepository.saveAll(Arrays.asList(patient, doctor, admin));
     }
 }

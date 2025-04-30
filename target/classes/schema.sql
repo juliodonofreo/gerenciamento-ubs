@@ -1,1 +1,0 @@
-ALTER TABLE tb_appointment ADD COLUMN type TEXT;
