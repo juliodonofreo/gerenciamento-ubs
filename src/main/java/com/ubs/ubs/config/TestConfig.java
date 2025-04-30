@@ -1,9 +1,6 @@
 package com.ubs.ubs.config;
 
-import com.ubs.ubs.entities.Doctor;
-import com.ubs.ubs.entities.Patient;
-import com.ubs.ubs.entities.Role;
-import com.ubs.ubs.entities.User;
+import com.ubs.ubs.entities.*;
 import com.ubs.ubs.entities.enums.Specialization;
 import com.ubs.ubs.repositories.RoleRepository;
 import com.ubs.ubs.repositories.UserRepository;
@@ -77,6 +74,16 @@ public class TestConfig {
         );
         admin.addRole(roleAdmin);
 
-        userRepository.saveAll(Arrays.asList(patient, doctor, admin));
+        User healthUnit = new HealthUnit(
+                null,
+                "UBS Central",
+                "ubs@test.com",
+                passwordEncoder.encode("maria"),
+                "1133344444",
+                "Av. Principal, 1000"
+        );
+        healthUnit.addRole(roleUnit);
+
+        userRepository.saveAll(Arrays.asList(patient, doctor, admin, healthUnit));
     }
 }

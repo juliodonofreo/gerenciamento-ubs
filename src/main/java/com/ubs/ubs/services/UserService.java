@@ -62,7 +62,7 @@ public class UserService implements UserDetailsService {
             return new UserFullDTO((Doctor) user);
         }
 
-        return null;
+        return new UserFullDTO(user);
     }
 
     public User getCurrentUser(){

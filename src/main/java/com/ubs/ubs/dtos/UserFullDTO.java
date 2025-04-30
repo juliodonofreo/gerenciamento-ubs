@@ -2,6 +2,7 @@ package com.ubs.ubs.dtos;
 
 import com.ubs.ubs.entities.Doctor;
 import com.ubs.ubs.entities.Patient;
+import com.ubs.ubs.entities.User;
 import com.ubs.ubs.entities.enums.Specialization;
 
 import java.time.Instant;
@@ -16,7 +17,7 @@ public class UserFullDTO {
     private Instant birth_date;
     private Specialization specialization;
 
-    private final List<RoleDTO> roles = new ArrayList<>();
+    private final List<String> roles = new ArrayList<>();
 
 
     public UserFullDTO(Long id, String name, String email, Instant birth_date, String cpf, Specialization specialization) {
@@ -41,7 +42,7 @@ public class UserFullDTO {
         birth_date = entity.getBirth_date();
         cpf = entity.getCpf();
 
-        entity.getRoles().forEach((x) -> roles.add(new RoleDTO(x)));
+        entity.getRoles().forEach((x) -> roles.add(x.getAuthority()));
     }
 
     public UserFullDTO(Doctor entity){
@@ -50,7 +51,15 @@ public class UserFullDTO {
         email = entity.getEmail();
         specialization = entity.getSpecialization();
 
-        entity.getRoles().forEach((x) -> roles.add(new RoleDTO(x)));
+        entity.getRoles().forEach((x) -> roles.add(x.getAuthority()));
+    }
+
+    public UserFullDTO(User entity) {
+        id = entity.getId();
+        name = entity.getName();
+        email = entity.getEmail();
+
+        entity.getRoles().forEach((x) -> roles.add(x.getAuthority()));
     }
 
     public Long getId() {
@@ -77,7 +86,7 @@ public class UserFullDTO {
         return specialization;
     }
 
-    public List<RoleDTO> getRoles() {
+    public List<String> getRoles() {
         return roles;
     }
 }

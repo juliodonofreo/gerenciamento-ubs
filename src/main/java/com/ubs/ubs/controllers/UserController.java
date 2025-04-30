@@ -15,9 +15,10 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/current")
+    @GetMapping("/me")
     public ResponseEntity<UserFullDTO> currentUser(){
         UserFullDTO dto = userService.currentUserDTO();
+        System.out.println(dto);
         return ResponseEntity.ok().body(dto);
     }
 }
