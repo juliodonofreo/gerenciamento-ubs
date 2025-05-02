@@ -19,13 +19,16 @@ public class PatientUpdateDTO extends UserUpdateDTO{
     @Valid
     private AddressUpdateDTO address;
 
+    private Long healthUnitId;
+
     public PatientUpdateDTO() {
     }
 
-    public PatientUpdateDTO(String nome, String email, String password, String cpf, Instant birth_date) {
+    public PatientUpdateDTO(String nome, String email, String password, String cpf, Instant birth_date, Long healthUnitId) {
         super(nome, email, password);
         this.cpf = cpf;
         this.birth_date = birth_date;
+        this.healthUnitId = healthUnitId;
     }
 
     public PatientUpdateDTO(Patient entity) {
@@ -33,6 +36,7 @@ public class PatientUpdateDTO extends UserUpdateDTO{
         cpf = entity.getCpf();
         birth_date = entity.getBirth_date();
         address = new AddressUpdateDTO(entity.getAddress());
+        healthUnitId = entity.getHealthUnit().getId();
     }
 
     public String getCpf() {
@@ -45,5 +49,9 @@ public class PatientUpdateDTO extends UserUpdateDTO{
 
     public AddressUpdateDTO getAddress() {
         return address;
+    }
+
+    public Long getHealthUnitId() {
+        return healthUnitId;
     }
 }

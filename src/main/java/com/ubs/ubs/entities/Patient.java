@@ -26,14 +26,20 @@ public class Patient extends User {
     @OneToMany(mappedBy = "companion")
     private List<Dependent> dependents = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "health_unit_id")
+    private HealthUnit healthUnit;
+
+
     public Patient(){
         super();
     }
 
-    public Patient(Long id, String name, String email, String password, String cpf, Instant birth_date) {
+    public Patient(Long id, String name, String email, String password, String cpf, Instant birth_date, HealthUnit healthUnit) {
         super(id, name, email, password);
         this.cpf = cpf;
         this.birth_date = birth_date;
+        this.healthUnit = healthUnit;
     }
 
     public String getCpf() {
@@ -66,5 +72,14 @@ public class Patient extends User {
 
     public List<Dependent> getDependents() {
         return dependents;
+    }
+
+
+    public HealthUnit getHealthUnit() {
+        return healthUnit;
+    }
+
+    public void setHealthUnit(HealthUnit healthUnit) {
+        this.healthUnit = healthUnit;
     }
 }

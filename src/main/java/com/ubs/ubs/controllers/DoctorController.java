@@ -1,59 +1,54 @@
 package com.ubs.ubs.controllers;
 
-import com.ubs.ubs.dtos.DoctorGetDTO;
-import com.ubs.ubs.dtos.DoctorInsertDTO;
+import com.ubs.ubs.dtos.DoctorCreateDTO;
+import com.ubs.ubs.dtos.DoctorResponseDTO;
 import com.ubs.ubs.dtos.DoctorUpdateDTO;
 import com.ubs.ubs.services.DoctorService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
+import java.util.List;
 
-@Controller
-@RequestMapping(value = "/doctors")
+@RestController
+@RequestMapping("/doctors")
 public class DoctorController {
 
     @Autowired
-    private DoctorService service;
-
-    @GetMapping
-    public ResponseEntity<Page<DoctorGetDTO>> findAll(Pageable pageable) {
-        Page<DoctorGetDTO> getDTO = service.findAll(pageable);
-        return ResponseEntity.ok().body(service.findAll(pageable));
-    }
-
-    @GetMapping(value = "/{email}")
-    public ResponseEntity<DoctorGetDTO> findByEmail(@PathVariable String email) {
-        return ResponseEntity.ok().body(service.findByEmail(email));
-    }
+    private DoctorService doctorService;
 
     @PostMapping
-    public ResponseEntity<DoctorGetDTO> insert(@Valid @RequestBody DoctorInsertDTO dto) {
-        DoctorGetDTO getDto = service.insert(dto);
-        URI uri = ServletUriComponentsBuilder
-                .fromCurrentContextPath()
-                .path("/users/{id}")
-                .buildAndExpand(dto.getId())
-                .toUri();
-        return ResponseEntity.created(uri).body(getDto);
+    @ResponseStatus(HttpStatus.CREATED)
+    @PreAuthorize("hasRole('ROLE_UNIT')")
+    public DoctorResponseDTO create(@Valid @RequestBody DoctorCreateDTO dto) {
+        return doctorService.create(dto);
     }
 
-    @PutMapping
-    public ResponseEntity<DoctorGetDTO> updateDoctor(@Valid @RequestBody DoctorUpdateDTO dto, Authentication authentication) {
-        DoctorGetDTO getDto = service.update(dto, authentication);
-        return ResponseEntity.ok().body(getDto);
+    @GetMapping
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_UNIT')")
+    public List<DoctorResponseDTO> findAll() {
+        return doctorService.findAll();
     }
 
-    @DeleteMapping
-    public ResponseEntity<Void> deleteDoctor() {
-        service.delete();
-        return ResponseEntity.noContent().build();
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_UNIT', 'ROLE_DOCTOR')")
+    public DoctorResponseDTO findById(@PathVariable Long id) {
+        return doctorService.findById(id);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_UNIT')")
+    public DoctorResponseDTO update(@PathVariable Long id, @Valid @RequestBody DoctorUpdateDTO dto, Authentication authentication) {
+        return doctorService.update(id, dto);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_UNIT')")
+    public void delete(@PathVariable Long id) {
+        doctorService.delete(id);
     }
 }

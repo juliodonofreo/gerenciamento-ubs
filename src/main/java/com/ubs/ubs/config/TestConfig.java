@@ -46,23 +46,45 @@ public class TestConfig {
                 roleUnit
         ));
 
+        User healthUnit = new HealthUnit(
+                null,
+                "UBS Central",
+                "ubs@test.com",
+                passwordEncoder.encode("maria"),
+                "1133344444",
+                "Av. Principal, 1000"
+        );
+        healthUnit.addRole(roleUnit);
+
+        userRepository.save(healthUnit);
+
+        HealthUnit healthUnitInstance =  new HealthUnit(healthUnit.getId(),
+                healthUnit.getName(),
+                healthUnit.getEmail(),
+                healthUnit.getPassword(),
+                null, null);
+
         // Cria usuários de teste
-        User patient = new Patient(
+        Patient patient = new Patient(
                 null,
                 "John Doe",
                 "patient@test.com",
                 passwordEncoder.encode("maria"),
                 "123456789",
-                Instant.parse("1990-05-15T00:00:00Z")
+                Instant.parse("1990-05-15T00:00:00Z"),
+                healthUnitInstance  // Associação com a UBS
         );
         patient.addRole(rolePatient);
 
-        User doctor = new Doctor(
+
+
+        Doctor doctor = new Doctor(
                 null,
                 "Dr. Smith",
                 "doctor@test.com",
                 passwordEncoder.encode("maria"),
-                Specialization.CARDIOLOGIA
+                Specialization.CARDIOLOGIA,
+                healthUnitInstance  // Associação com a UBS
         );
         doctor.addRole(roleDoctor);
 
@@ -74,16 +96,15 @@ public class TestConfig {
         );
         admin.addRole(roleAdmin);
 
-        User healthUnit = new HealthUnit(
+        User staff = new Staff(
                 null,
-                "UBS Central",
-                "ubs@test.com",
+                "Enfermeira Ana Silva",
+                "ana.silva@ubs.com",
                 passwordEncoder.encode("maria"),
-                "1133344444",
-                "Av. Principal, 1000"
+               healthUnitInstance
         );
-        healthUnit.addRole(roleUnit);
+        staff.addRole(roleStaff);
 
-        userRepository.saveAll(Arrays.asList(patient, doctor, admin, healthUnit));
+        userRepository.saveAll(Arrays.asList(patient, doctor, admin, staff));
     }
 }
