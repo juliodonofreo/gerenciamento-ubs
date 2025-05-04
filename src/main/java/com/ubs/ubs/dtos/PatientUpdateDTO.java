@@ -16,26 +16,30 @@ public class PatientUpdateDTO extends UserUpdateDTO{
     @PastOrPresent(message = ValidationErrorMessages.DATE_CANNOT_BE_IN_FUTURE)
     private Instant birth_date;
 
-    @Valid
-    private AddressUpdateDTO address;
+    private String address;
+
+    private String phone;
 
     private Long healthUnitId;
 
     public PatientUpdateDTO() {
     }
 
-    public PatientUpdateDTO(String nome, String email, String password, String cpf, Instant birth_date, Long healthUnitId) {
+    public PatientUpdateDTO(String nome, String email, String password, String cpf, Instant birth_date, Long healthUnitId, String address, String phone) {
         super(nome, email, password);
         this.cpf = cpf;
         this.birth_date = birth_date;
         this.healthUnitId = healthUnitId;
+        this.address = address;
+        this.phone = phone;
     }
 
     public PatientUpdateDTO(Patient entity) {
         super(entity.getName(), entity.getEmail(), entity.getPassword());
         cpf = entity.getCpf();
         birth_date = entity.getBirth_date();
-        address = new AddressUpdateDTO(entity.getAddress());
+        address = entity.getAddress();
+        phone = entity.getPhone();
         healthUnitId = entity.getHealthUnit().getId();
     }
 
@@ -47,11 +51,15 @@ public class PatientUpdateDTO extends UserUpdateDTO{
         return birth_date;
     }
 
-    public AddressUpdateDTO getAddress() {
+    public String getAddress() {
         return address;
     }
 
     public Long getHealthUnitId() {
         return healthUnitId;
+    }
+
+    public String getPhone() {
+        return phone;
     }
 }

@@ -12,5 +12,7 @@ public record PatientCreateDTO(
         @NotBlank String password,
         @NotBlank String cpf,
         @NotNull Instant birth_date,
-        @NotNull Long healthUnitId
+        @NotNull Long healthUnitId,
+        String address,
+        String phone
 ) {}

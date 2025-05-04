@@ -1,7 +1,5 @@
 package com.ubs.ubs.dtos;
 
-import com.ubs.ubs.dtos.DoctorResponseDTO;
-import com.ubs.ubs.entities.Address;
 import com.ubs.ubs.entities.Patient;
 
 import java.time.Instant;
@@ -15,7 +13,8 @@ public record PatientResponseDTO(
         String cpf,
         Instant birth_date,
         DoctorResponseDTO.HealthUnitDTO healthUnit,
-        AddressDTO address,
+        String address,
+        String phone,
         List<String> roles
 ) {
     public PatientResponseDTO(Patient patient) {
@@ -26,7 +25,8 @@ public record PatientResponseDTO(
                 patient.getCpf(),
                 patient.getBirth_date(),
                 patient.getHealthUnit() != null ? new DoctorResponseDTO.HealthUnitDTO(patient.getHealthUnit()) : null,
-                patient.getAddress() != null ? new AddressDTO(patient.getAddress()) : null,
+                patient.getAddress() != null ? patient.getAddress() : null,
+                patient.getPhone(),
                 patient.getRoles().stream()
                         .map(role -> role.getAuthority())
                         .collect(Collectors.toList())
@@ -40,14 +40,6 @@ public record PatientResponseDTO(
             String city,
             String cep
     ) {
-        public AddressDTO(Address address) {
-            this(
-                    address.getStreet(),
-                    address.getNumber(),
-                    address.getDistrict(),
-                    address.getCity(),
-                    address.getCep()
-            );
-        }
+
     }
 }

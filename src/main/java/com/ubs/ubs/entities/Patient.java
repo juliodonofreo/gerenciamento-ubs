@@ -16,9 +16,9 @@ public class Patient extends User {
     @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
     private Instant birth_date;
 
-    @OneToOne
-    @JoinColumn(name = "address_id")
-    private Address address;
+    private String address;
+
+    private String phone;
 
     @OneToMany(mappedBy = "patient")
     private List<Appointment> appointments = new ArrayList<>();
@@ -40,6 +40,24 @@ public class Patient extends User {
         this.cpf = cpf;
         this.birth_date = birth_date;
         this.healthUnit = healthUnit;
+        this.address = address;
+    }
+
+    public Patient(Long id, String name, String email, String password, String cpf, Instant birth_date, HealthUnit healthUnit, String address) {
+        super(id, name, email, password);
+        this.cpf = cpf;
+        this.birth_date = birth_date;
+        this.healthUnit = healthUnit;
+        this.address = address;
+    }
+
+    public Patient(Long id, String name, String email, String password, String cpf, Instant birth_date, HealthUnit healthUnit, String address, String phone) {
+        super(id, name, email, password);
+        this.cpf = cpf;
+        this.birth_date = birth_date;
+        this.healthUnit = healthUnit;
+        this.address = address;
+        this.phone = phone;
     }
 
     public String getCpf() {
@@ -58,12 +76,20 @@ public class Patient extends User {
         this.birth_date = data_nascimento;
     }
 
-    public Address getAddress() {
+    public String getAddress() {
         return address;
     }
 
-    public void setAddress(Address address) {
+    public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public List<Appointment> getAppointments() {

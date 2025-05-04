@@ -21,26 +21,23 @@ public class PatientInsertDTO extends UserInsertDTO {
     @NotNull(message = ValidationErrorMessages.MANDATORY_FIELD)
     private Instant birth_date;
 
-    @Valid
-    private AddressInsertDTO address;
+    private String address;
 
     public PatientInsertDTO() {
     }
 
-    public PatientInsertDTO(Long id, String nome, String email, String password, String cpf, Instant birth_date) {
+    public PatientInsertDTO(Long id, String nome, String email, String password, String cpf, Instant birth_date, String address) {
         super(id, nome, email, password);
         this.cpf = cpf;
         this.birth_date = birth_date;
+        this.address = address;
     }
 
     public PatientInsertDTO(Patient entity) {
         super(entity.getId(), entity.getName(), entity.getEmail(), entity.getPassword());
         cpf = entity.getCpf();
         birth_date = entity.getBirth_date();
-
-        if (entity.getAddress() != null){
-            address = new AddressInsertDTO(entity.getAddress());
-        }
+        address = entity.getAddress();
     }
 
     public String getCpf() {
@@ -51,7 +48,7 @@ public class PatientInsertDTO extends UserInsertDTO {
         return birth_date;
     }
 
-    public AddressInsertDTO getAddress() {
+    public String getAddress() {
         return address;
     }
 }

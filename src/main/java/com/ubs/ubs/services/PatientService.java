@@ -51,10 +51,12 @@ public class PatientService {
         Patient patient = new Patient();
         patient.setName(dto.name());
         patient.setEmail(dto.email());
+        patient.setAddress(dto.address());
         patient.setPassword(passwordEncoder.encode(dto.password()));
         patient.setCpf(dto.cpf());
         patient.setBirth_date(dto.birth_date());
         patient.setHealthUnit(healthUnit);
+        patient.setPhone(dto.phone());
         patient.getRoles().add(roleRepository.findByAuthority("ROLE_PATIENT").get());
 
         return new PatientResponseDTO(patientRepository.save(patient));
@@ -141,6 +143,9 @@ public class PatientService {
         }
         if (dto.getBirth_date() != null) {
             patient.setBirth_date(dto.getBirth_date());
+        }
+        if (dto.getAddress() != null){
+            patient.setAddress(dto.getAddress());
         }
         if (dto.getHealthUnitId() != null) {
             HealthUnit newUnit = healthUnitRepository.findById(dto.getHealthUnitId())
