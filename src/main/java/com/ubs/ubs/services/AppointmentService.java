@@ -2,10 +2,8 @@ package com.ubs.ubs.services;
 
 import com.ubs.ubs.dtos.AppointmentGetDTO;
 import com.ubs.ubs.dtos.AppointmentInsertDTO;
-import com.ubs.ubs.entities.Appointment;
-import com.ubs.ubs.entities.Doctor;
-import com.ubs.ubs.entities.Patient;
-import com.ubs.ubs.entities.User;
+import com.ubs.ubs.dtos.AppointmentUpdateDTO;
+import com.ubs.ubs.entities.*;
 import com.ubs.ubs.repositories.AppointmentRepository;
 import com.ubs.ubs.repositories.DoctorRepository;
 import com.ubs.ubs.repositories.PatientRepository;
@@ -14,6 +12,8 @@ import com.ubs.ubs.services.exceptions.ForbiddenException;
 import com.ubs.ubs.services.utils.ServiceErrorMessages;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -51,27 +51,57 @@ public class AppointmentService {
         User user = userService.getCurrentUser();
         Appointment appointment = new Appointment();
 
+        // Configuração básica
         appointment.setDate(dto.getDate());
         appointment.setDiagnosis(dto.getDiagnosis());
         appointment.setState(dto.getState());
         appointment.setType(dto.getType());
 
-        if(user instanceof Patient patient){
-            appointment.setPatient(patient);
+        // Busca direta por IDs
+        Doctor doctor = doctorRepository.findById(dto.getDoctorId())
+                .orElseThrow(() -> new CustomNotFoundException("Médico não encontrado com ID: " + dto.getDoctorId()));
 
-            Doctor doctor = doctorRepository.findByEmail(dto.getDoctor().getEmail()).orElseThrow(() -> new CustomNotFoundException(ServiceErrorMessages.DOCTOR_NOT_FOUND));
-            appointment.setDoctor(doctor);
+        Patient patient = patientRepository.findById(dto.getPatientId())
+                .orElseThrow(() -> new CustomNotFoundException("Paciente não encontrado com ID: " + dto.getPatientId()));
+
+        // Validação de unidade
+        if (!doctor.getHealthUnit().getId().equals(patient.getHealthUnit().getId())) {
+            throw new IllegalArgumentException("Médico e paciente devem ser da mesma unidade de saúde");
         }
 
-        if (user instanceof Doctor doctor){
-            appointment.setDoctor(doctor);
-
-            Patient patient = patientRepository.getPatientByCpf(dto.getPatient().getCpf()).orElseThrow(() -> new CustomNotFoundException(ServiceErrorMessages.PATIENT_NOT_FOUND));
-            appointment.setPatient(patient);
+        // Lógica de permissões
+        if (user instanceof Patient) {
+            if (!patient.getId().equals(user.getId())) {
+                throw new AccessDeniedException("Paciente só pode agendar consultas para si mesmo");
+            }
+        } else if (user instanceof Doctor) {
+            if (!doctor.getId().equals(user.getId())) {
+                throw new AccessDeniedException("Médico só pode criar consultas para si mesmo");
+            }
         }
 
-        appointment = appointmentRepository.save(appointment);
-        return new AppointmentGetDTO(appointment);
+        appointment.setDoctor(doctor);
+        appointment.setPatient(patient);
+
+        return new AppointmentGetDTO(appointmentRepository.save(appointment));
+    }
+
+    private void validateDoctorUnit(Doctor doctor, HealthUnit patientUnit) {
+        if (!doctor.getHealthUnit().equals(patientUnit)) {
+            throw new IllegalArgumentException("Médico não pertence à mesma unidade de saúde do paciente");
+        }
+    }
+
+    private void validatePatientUnit(Patient patient, HealthUnit doctorUnit) {
+        if (!patient.getHealthUnit().equals(doctorUnit)) {
+            throw new IllegalArgumentException("Paciente não pertence à mesma unidade de saúde do médico");
+        }
+    }
+
+    private void validateUnitConsistency(Patient patient, Doctor doctor) {
+        if (!patient.getHealthUnit().equals(doctor.getHealthUnit())) {
+            throw new IllegalArgumentException("Paciente e médico devem pertencer à mesma unidade de saúde");
+        }
     }
 
     public AppointmentGetDTO findById(Long id) {
@@ -79,38 +109,98 @@ public class AppointmentService {
         return new AppointmentGetDTO(appointment);
     }
 
-    public AppointmentGetDTO update(Long id, AppointmentInsertDTO dto) {
-        Appointment entity = appointmentRepository.findById(id).orElseThrow(() -> new CustomNotFoundException(ServiceErrorMessages.APPOINTMENT_NOT_FOUND));
+    public AppointmentGetDTO update(Long id, AppointmentUpdateDTO dto) {
+        Appointment entity = appointmentRepository.findById(id)
+                .orElseThrow(() -> new CustomNotFoundException(ServiceErrorMessages.APPOINTMENT_NOT_FOUND));
+
         User currentUser = userService.getCurrentUser();
+        validatePermissions(currentUser, entity);
 
-        try {
-            userService.validateSelfOrAdmin(currentUser.getId(), entity.getDoctor().getId(), "Usuário não pode editar este appointment.");
+        // Atualização básica dos campos
+        updateCoreFields(entity, dto);
+
+        // Atualização de médico e paciente com validações
+        updateDoctor(entity, dto);
+        updatePatient(entity, dto);
+
+        // Validação final da unidade de saúde
+        validateHealthUnitConsistency(entity);
+
+        return new AppointmentGetDTO(appointmentRepository.save(entity));
+    }
+
+    private void validatePermissions(User currentUser, Appointment appointment) {
+        boolean isAuthorized = false;
+
+        if (currentUser instanceof Patient patient) {
+            isAuthorized = patient.getId().equals(appointment.getPatient().getId());
         }
-        catch (ForbiddenException e){
-            userService.validateSelfOrAdmin(currentUser.getId(), entity.getPatient().getId(), "Usuário não pode editar este appointment.");
+        else if (currentUser instanceof Doctor doctor) {
+            isAuthorized = doctor.getId().equals(appointment.getDoctor().getId());
+        }
+        else if (currentUser instanceof Staff staff) {
+            isAuthorized = staff.getHealthUnit().getId().equals(appointment.getDoctor().getHealthUnit().getId());
+        }
+        else if (currentUser instanceof HealthUnit unit) {
+            isAuthorized = unit.getId().equals(appointment.getDoctor().getHealthUnit().getId());
         }
 
-        if (dto.getDiagnosis() != null){
+        if (!isAuthorized) {
+            throw new AccessDeniedException("Usuário não tem permissão para atualizar esta consulta");
+        }
+    }
+
+    private void updateCoreFields(Appointment entity, AppointmentUpdateDTO dto) {
+        if (dto.getDiagnosis() != null) {
             entity.setDiagnosis(dto.getDiagnosis());
         }
 
-        entity.setDate(dto.getDate());
-        entity.setState(dto.getState());
-        entity.setType(dto.getType());
-
-        if (dto.getDoctor() != null && dto.getDoctor().getEmail() != null){
-            Doctor doctor = doctorRepository.findByEmail(dto.getDoctor().getEmail()).orElseThrow(()-> new CustomNotFoundException(ServiceErrorMessages.DOCTOR_NOT_FOUND));
-            entity.setDoctor(doctor);
+        if (dto.getDate() != null) {
+            entity.setDate(dto.getDate());
         }
 
-        if (dto.getPatient() != null && dto.getPatient().getCpf() != null){
-            Patient patient = patientRepository.getPatientByCpf(dto.getPatient().getCpf()).orElseThrow(()-> new CustomNotFoundException(ServiceErrorMessages.PATIENT_NOT_FOUND));
-            entity.setPatient(patient);
+        if (dto.getState() != null) {
+            entity.setState(dto.getState());
         }
 
-        entity = appointmentRepository.save(entity);
+        if (dto.getType() != null) {
+            entity.setType(dto.getType());
+        }
+    }
 
-        return new AppointmentGetDTO(entity);
+    private void updateDoctor(Appointment entity, AppointmentUpdateDTO dto) {
+        if (dto.getDoctorId() != null) {
+            Doctor newDoctor = doctorRepository.findById(dto.getDoctorId())
+                    .orElseThrow(() -> new CustomNotFoundException(ServiceErrorMessages.DOCTOR_NOT_FOUND));
+
+            if (!newDoctor.getHealthUnit().getId().equals(entity.getDoctor().getHealthUnit().getId())) {
+                throw new IllegalArgumentException("Novo médico deve ser da mesma unidade de saúde");
+            }
+
+            entity.setDoctor(newDoctor);
+        }
+    }
+
+    private void updatePatient(Appointment entity, AppointmentUpdateDTO dto) {
+        if (dto.getPatientId() != null) {
+            Patient newPatient = patientRepository.findById(dto.getPatientId())
+                    .orElseThrow(() -> new CustomNotFoundException(ServiceErrorMessages.PATIENT_NOT_FOUND));
+
+            if (!newPatient.getHealthUnit().getId().equals(entity.getPatient().getHealthUnit().getId())) {
+                throw new IllegalArgumentException("Novo paciente deve ser da mesma unidade de saúde");
+            }
+
+            entity.setPatient(newPatient);
+        }
+    }
+
+    private void validateHealthUnitConsistency(Appointment appointment) {
+        Long doctorUnitId = appointment.getDoctor().getHealthUnit().getId();
+        Long patientUnitId = appointment.getPatient().getHealthUnit().getId();
+
+        if (!doctorUnitId.equals(patientUnitId)) {
+            throw new IllegalStateException("Médico e paciente devem pertencer à mesma unidade de saúde");
+        }
     }
 
     @Scheduled(cron = "0 0 8 * * *")
@@ -142,5 +232,14 @@ public class AppointmentService {
                     formattedDate
             );
         }
+    }
+
+    public List<AppointmentGetDTO> findAllByHealthUnit() {
+        HealthUnit healthUnit = (HealthUnit) userService.getCurrentUser();
+
+        return appointmentRepository.findByDoctorHealthUnitOrPatientHealthUnit(healthUnit.getId())
+                .stream()
+                .map(AppointmentGetDTO::new)
+                .toList();
     }
 }

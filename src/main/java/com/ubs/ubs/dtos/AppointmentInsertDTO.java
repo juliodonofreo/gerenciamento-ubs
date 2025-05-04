@@ -3,6 +3,8 @@ package com.ubs.ubs.dtos;
 import com.ubs.ubs.dtos.utils.ValidationErrorMessages;
 import com.ubs.ubs.entities.Appointment;
 import com.ubs.ubs.entities.enums.AppointmentState;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.Length;
 
 
@@ -10,44 +12,47 @@ import java.time.Instant;
 
 public class AppointmentInsertDTO {
 
-    private Long id;
+    @NotNull
     private Instant date;
 
-    @Length(min = 3, message = ValidationErrorMessages.INVALID_DIAGNOSIS_LENGTH)
+    @NotBlank
     private String diagnosis;
+
+    @NotNull
     private AppointmentState state;
-    private PatientInsertDTO patient;
-    private DoctorInsertDTO doctor;
+
+    @NotBlank
     private String type;
+
+    @NotNull
+    private Long doctorId;
+
+    @NotNull
+    private Long patientId;
 
     public AppointmentInsertDTO(){
 
     }
 
-    public AppointmentInsertDTO(Long id, Instant date, String diagnosis, AppointmentState state, DoctorInsertDTO doctor, PatientInsertDTO patient, String type) {
-        this.id = id;
+    public AppointmentInsertDTO(Instant date, AppointmentState state, String diagnosis, String type, Long doctorId, Long patientId) {
         this.date = date;
-        this.diagnosis = diagnosis;
         this.state = state;
-        this.doctor = doctor;
-        this.patient = patient;
+        this.diagnosis = diagnosis;
         this.type = type;
+        this.doctorId = doctorId;
+        this.patientId = patientId;
     }
 
     public AppointmentInsertDTO(Appointment entity) {
-        this.id = entity.getId();
         this.date = entity.getDate();
         this.diagnosis = entity.getDiagnosis();
         this.state = entity.getState();
         this.type = entity.getType();
 
-        this.patient = new PatientInsertDTO(entity.getPatient());
-        this.doctor = new DoctorInsertDTO(entity.getDoctor());
+        this.patientId = entity.getPatient().getId();
+        this.doctorId = entity.getDoctor().getId();
     }
 
-    public Long getId() {
-        return id;
-    }
 
     public Instant getDate() {
         return date;
@@ -61,12 +66,12 @@ public class AppointmentInsertDTO {
         return state;
     }
 
-    public PatientInsertDTO getPatient() {
-        return patient;
+    public Long getDoctorId() {
+        return doctorId;
     }
 
-    public DoctorInsertDTO getDoctor() {
-        return doctor;
+    public Long getPatientId() {
+        return patientId;
     }
 
     public String getType() {

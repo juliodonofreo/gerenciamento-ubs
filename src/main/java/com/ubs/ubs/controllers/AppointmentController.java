@@ -2,6 +2,7 @@ package com.ubs.ubs.controllers;
 
 import com.ubs.ubs.dtos.AppointmentGetDTO;
 import com.ubs.ubs.dtos.AppointmentInsertDTO;
+import com.ubs.ubs.dtos.AppointmentUpdateDTO;
 import com.ubs.ubs.entities.Appointment;
 import com.ubs.ubs.services.AppointmentService;
 import jakarta.validation.Valid;
@@ -21,10 +22,10 @@ public class AppointmentController {
     @Autowired
     private AppointmentService service;
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_UNIT')") // Alterado para ROLE_UNIT
     @GetMapping
-    public ResponseEntity<List<AppointmentGetDTO>> findAll(){
-        return ResponseEntity.ok().body(service.findAll());
+    public ResponseEntity<List<AppointmentGetDTO>> findAllByHealthUnit(){
+        return ResponseEntity.ok().body(service.findAllByHealthUnit());
     }
 
     @GetMapping("/{id}")
@@ -45,7 +46,7 @@ public class AppointmentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<AppointmentGetDTO> update(@PathVariable Long id, @RequestBody @Valid AppointmentInsertDTO dto){
+    public ResponseEntity<AppointmentGetDTO> update(@PathVariable Long id, @RequestBody @Valid AppointmentUpdateDTO dto){
         AppointmentGetDTO getDto = service.update(id, dto);
         return ResponseEntity.ok().body(getDto);
     }

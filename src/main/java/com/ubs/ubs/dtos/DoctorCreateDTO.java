@@ -10,5 +10,6 @@ public record DoctorCreateDTO(
         @NotBlank @Email String email,
         @NotBlank String password,
         @NotNull Specialization specialization,
-        @NotNull Long healthUnitId
+        @NotNull Long healthUnitId,
+        String crm
 ) {}

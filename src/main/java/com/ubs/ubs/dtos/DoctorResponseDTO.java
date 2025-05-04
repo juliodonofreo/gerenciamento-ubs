@@ -13,6 +13,7 @@ public record DoctorResponseDTO(
         String email,
         Specialization specialization,
         HealthUnitDTO healthUnit,
+        String crm,
         List<String> roles
 ) {
     public DoctorResponseDTO(Doctor doctor) {
@@ -22,6 +23,7 @@ public record DoctorResponseDTO(
                 doctor.getEmail(),
                 doctor.getSpecialization(),
                 doctor.getHealthUnit() != null ? new HealthUnitDTO(doctor.getHealthUnit()) : null,
+                doctor.getCrm(),
                 doctor.getRoles().stream()
                         .map(role -> role.getAuthority())
                         .collect(Collectors.toList())

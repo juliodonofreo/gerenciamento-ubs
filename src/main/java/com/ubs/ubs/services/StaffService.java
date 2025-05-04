@@ -13,7 +13,6 @@ import com.ubs.ubs.repositories.StaffRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +37,7 @@ public class StaffService {
     private UserService userService;
 
     @PreAuthorize("hasRole('ROLE_UNIT')")
-    public StaffResponseDTO create(StaffCreateDTO dto, Authentication authentication) {
+    public StaffResponseDTO create(StaffCreateDTO dto) {
         System.out.println("ID: " + dto.healthUnitId());
         HealthUnit healthUnit = healthUnitRepository.findById(dto.healthUnitId())
                 .orElseThrow(() -> new RuntimeException("Health Unit not found"));
@@ -58,6 +57,7 @@ public class StaffService {
 
         return new StaffResponseDTO(repository.save(staff));
     }
+
     @PreAuthorize("hasRole('ROLE_UNIT')")
     public StaffResponseDTO update(Long id, StaffUpdateDTO dto) {
         Staff staff = repository.findById(id)
@@ -76,8 +76,8 @@ public class StaffService {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_UNIT')")
-    public List<StaffResponseDTO> findAll(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+    public List<StaffResponseDTO> findAll() {
+        User user = userService.getCurrentUser();
 
         if (user.hasRole("ROLE_ADMIN")) {
             return repository.findAll().stream()

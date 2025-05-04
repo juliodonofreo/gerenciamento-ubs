@@ -59,9 +59,22 @@ public class HealthUnitService {
         HealthUnit unit = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Unidade não encontrada"));
 
+        // Verifica se o novo email já está em uso por outra unidade
+        if (dto.email() != null && !unit.getEmail().equals(dto.email())) {
+            if (repository.existsByEmail(dto.email())) {
+                throw new IllegalArgumentException("Email já está em uso");
+            }
+            unit.setEmail(dto.email());
+        }
+
         if (dto.name() != null) unit.setName(dto.name());
         if (dto.phone() != null) unit.setPhone(dto.phone());
         if (dto.address() != null) unit.setAddress(dto.address());
+
+        // Atualiza a senha apenas se for fornecida
+        if (dto.password() != null && !dto.password().isBlank()) {
+            unit.setPassword(passwordEncoder.encode(dto.password()));
+        }
 
         HealthUnit updatedUnit = repository.save(unit);
         return convertToDTO(updatedUnit);

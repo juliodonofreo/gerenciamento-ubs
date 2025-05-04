@@ -48,6 +48,7 @@ public class DoctorService {
 
         Doctor doctor = new Doctor();
         doctor.setName(dto.name());
+        doctor.setCrm(dto.crm());
         doctor.setEmail(dto.email());
         doctor.setPassword(passwordEncoder.encode(dto.password()));
         doctor.setSpecialization(dto.specialization());
@@ -117,6 +118,9 @@ public class DoctorService {
         // Atualiza campos permitidos
         if (dto.getName() != null) {
             doctor.setName(dto.getName());
+        }
+        if(dto.getCrm() != null){
+            doctor.setCrm(dto.getCrm());
         }
         if (dto.getSpecialization() != null) {
             doctor.setSpecialization(dto.getSpecialization());

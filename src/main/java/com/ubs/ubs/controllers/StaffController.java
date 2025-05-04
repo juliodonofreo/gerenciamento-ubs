@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/staff")
+@RequestMapping("/staffs")
 public class StaffController {
 
     @Autowired
@@ -22,14 +22,14 @@ public class StaffController {
 
     @PostMapping
     @PreAuthorize("hasRole('ROLE_UNIT')")
-    public StaffResponseDTO create(@Valid @RequestBody StaffCreateDTO dto, Authentication authentication) {
-        return service.create(dto, authentication);
+    public StaffResponseDTO create(@Valid @RequestBody StaffCreateDTO dto) {
+        return service.create(dto);
     }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_UNIT')")
-    public List<StaffResponseDTO> findAll(Authentication authentication) {
-        return service.findAll(authentication);
+    public List<StaffResponseDTO> findAll() {
+        return service.findAll();
     }
 
     @PutMapping("/{id}")
