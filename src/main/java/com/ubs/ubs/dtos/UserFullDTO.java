@@ -16,16 +16,18 @@ public class UserFullDTO {
     private String cpf;
     private Instant birth_date;
     private Specialization specialization;
+    private String crm;
 
     private final List<String> roles = new ArrayList<>();
 
 
-    public UserFullDTO(Long id, String name, String email, Instant birth_date, String cpf, Specialization specialization) {
+    public UserFullDTO(Long id, String name, String email, Instant birth_date, String cpf, Specialization specialization, String crm) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.birth_date = birth_date;
         this.cpf = cpf;
+        this.crm = crm;
     }
 
     public UserFullDTO(Long id, String name, String email, Specialization specialization){
@@ -50,6 +52,7 @@ public class UserFullDTO {
         name = entity.getName();
         email = entity.getEmail();
         specialization = entity.getSpecialization();
+        crm = entity.getCrm();
 
         entity.getRoles().forEach((x) -> roles.add(x.getAuthority()));
     }
@@ -76,6 +79,10 @@ public class UserFullDTO {
 
     public String getCpf() {
         return cpf;
+    }
+
+    public String getCrm() {
+        return crm;
     }
 
     public Instant getBirth_date() {

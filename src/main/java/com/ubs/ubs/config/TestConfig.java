@@ -85,7 +85,7 @@ public class TestConfig {
                 passwordEncoder.encode("maria"),
                 Specialization.CARDIOLOGIA,
                 healthUnitInstance,
-                "122256486" // Associação com a UBS
+                "122256486"
         );
         doctor.addRole(roleDoctor);
 

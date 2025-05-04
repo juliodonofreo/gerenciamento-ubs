@@ -1,19 +1,21 @@
 package com.ubs.ubs.services;
 
+import com.ubs.ubs.dtos.AppointmentConcludeDTO;
 import com.ubs.ubs.dtos.AppointmentGetDTO;
 import com.ubs.ubs.dtos.AppointmentInsertDTO;
 import com.ubs.ubs.dtos.AppointmentUpdateDTO;
 import com.ubs.ubs.entities.*;
+import com.ubs.ubs.entities.enums.AppointmentState;
 import com.ubs.ubs.repositories.AppointmentRepository;
 import com.ubs.ubs.repositories.DoctorRepository;
+import com.ubs.ubs.repositories.ExamRepository;
 import com.ubs.ubs.repositories.PatientRepository;
 import com.ubs.ubs.services.exceptions.CustomNotFoundException;
-import com.ubs.ubs.services.exceptions.ForbiddenException;
 import com.ubs.ubs.services.utils.ServiceErrorMessages;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -22,6 +24,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AppointmentService {
@@ -40,6 +43,10 @@ public class AppointmentService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private ExamRepository examRepository;
+
 
 
     public List<AppointmentGetDTO> findAll(){
@@ -241,5 +248,36 @@ public class AppointmentService {
                 .stream()
                 .map(AppointmentGetDTO::new)
                 .toList();
+    }
+
+    public AppointmentGetDTO concludeAppointment(Long id, AppointmentConcludeDTO dto) {
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
+
+        if (!appointment.getDoctor().getId().equals(userService.getCurrentUser().getId())) {
+            throw new AccessDeniedException("Doctor not authorized for this appointment");
+        }
+
+        appointment.setState(AppointmentState.CONCLUIDO);
+        appointment.setDiagnosis(dto.observations());
+
+        if (dto.examType() != null && !dto.examType().isEmpty()) {
+            Exam exam = new Exam();
+            exam.setType(dto.examType());
+            exam.setExamDate(dto.examDate().atStartOfDay());
+            exam.setAppointment(appointment);
+            examRepository.save(exam);
+        }
+
+        return new AppointmentGetDTO(appointmentRepository.save(appointment));
+    }
+
+    public List<AppointmentGetDTO> findAllByDoctor() {
+        User currentUser = userService.getCurrentUser(); // Assume-se que existe um método para obter o usuário autenticado
+        List<Appointment> appointments = appointmentRepository.findByDoctorId(currentUser.getId());
+
+        return appointments.stream()
+                .map(AppointmentGetDTO::new)
+                .collect(Collectors.toList());
     }
 }

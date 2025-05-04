@@ -1,5 +1,6 @@
 package com.ubs.ubs.controllers;
 
+import com.ubs.ubs.dtos.AppointmentConcludeDTO;
 import com.ubs.ubs.dtos.AppointmentGetDTO;
 import com.ubs.ubs.dtos.AppointmentInsertDTO;
 import com.ubs.ubs.dtos.AppointmentUpdateDTO;
@@ -49,5 +50,19 @@ public class AppointmentController {
     public ResponseEntity<AppointmentGetDTO> update(@PathVariable Long id, @RequestBody @Valid AppointmentUpdateDTO dto){
         AppointmentGetDTO getDto = service.update(id, dto);
         return ResponseEntity.ok().body(getDto);
+    }
+
+    @PreAuthorize("hasRole('ROLE_DOCTOR')")
+    @GetMapping("/doctor")
+    public ResponseEntity<List<AppointmentGetDTO>> findAllByDoctor() {
+        return ResponseEntity.ok().body(service.findAllByDoctor());
+    }
+
+    @PreAuthorize("hasRole('ROLE_DOCTOR')")
+    @PatchMapping("/{id}/conclude")
+    public ResponseEntity<AppointmentGetDTO> concludeAppointment(
+            @PathVariable Long id,
+            @RequestBody @Valid AppointmentConcludeDTO dto) {
+        return ResponseEntity.ok().body(service.concludeAppointment(id, dto));
     }
 }
