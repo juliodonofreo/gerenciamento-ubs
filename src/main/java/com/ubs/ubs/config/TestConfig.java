@@ -72,7 +72,9 @@ public class TestConfig {
                 passwordEncoder.encode("maria"),
                 "123456789",
                 Instant.parse("1990-05-15T00:00:00Z"),
-                healthUnitInstance  // Associação com a UBS
+                healthUnitInstance,
+                null,
+                "(28) 2616-8855"
         );
         patient.addRole(rolePatient);
 

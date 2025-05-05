@@ -35,6 +35,12 @@ public class AppointmentController {
         return ResponseEntity.ok().body(dto);
     }
 
+    @PreAuthorize("hasRole('ROLE_PATIENT')")
+    @GetMapping("/patient")
+    public ResponseEntity<List<AppointmentGetDTO>> findAllByPatient() {
+        return ResponseEntity.ok().body(service.findAllByPatient());
+    }
+
     @PreAuthorize("isAuthenticated()")
     @PostMapping
     public ResponseEntity<AppointmentGetDTO> insert(@RequestBody @Valid AppointmentInsertDTO dto){

@@ -11,6 +11,7 @@ import com.ubs.ubs.repositories.DoctorRepository;
 import com.ubs.ubs.repositories.ExamRepository;
 import com.ubs.ubs.repositories.PatientRepository;
 import com.ubs.ubs.services.exceptions.CustomNotFoundException;
+import com.ubs.ubs.services.exceptions.ForbiddenException;
 import com.ubs.ubs.services.utils.ServiceErrorMessages;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -275,6 +276,21 @@ public class AppointmentService {
     public List<AppointmentGetDTO> findAllByDoctor() {
         User currentUser = userService.getCurrentUser(); // Assume-se que existe um método para obter o usuário autenticado
         List<Appointment> appointments = appointmentRepository.findByDoctorId(currentUser.getId());
+
+        return appointments.stream()
+                .map(AppointmentGetDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    public List<AppointmentGetDTO> findAllByPatient() {
+        User user = userService.getCurrentUser();
+
+        if (!(user instanceof Patient)) {
+            throw new ForbiddenException("Usuário não é um paciente");
+        }
+
+        Patient patient = (Patient) user;
+        List<Appointment> appointments = appointmentRepository.findByPatientId(patient.getId());
 
         return appointments.stream()
                 .map(AppointmentGetDTO::new)

@@ -1,5 +1,6 @@
 package com.ubs.ubs.repositories;
 
+import com.ubs.ubs.entities.Appointment;
 import com.ubs.ubs.entities.Patient;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
