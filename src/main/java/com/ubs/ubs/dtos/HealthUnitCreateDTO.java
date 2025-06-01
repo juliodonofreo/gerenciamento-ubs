@@ -7,7 +7,6 @@ import jakarta.validation.constraints.Size;
 
 public record HealthUnitCreateDTO(
         @NotBlank(message = "Nome é obrigatório")
-        @Size(min = 5, max = 100, message = "Nome deve ter entre 5 e 100 caracteres")
         String name,
 
         @NotBlank(message = "Email é obrigatório")
@@ -15,7 +14,6 @@ public record HealthUnitCreateDTO(
         String email,
 
         @NotBlank(message = "Senha é obrigatória")
-        @Size(min = 6, message = "Senha deve ter no mínimo 6 caracteres")
         String password,
 
         @NotBlank(message = "Telefone é obrigatório")

@@ -141,7 +141,7 @@ public class UserService implements UserDetailsService {
 
         String message = "Prezado(a) " + user.getName() + ",\n\n"
                 + "Para redefinir sua senha, clique no link abaixo:\n"
-                + recoverUri + token + "\n\n"
+                + recoverUri + "?token=" + token + "\n\n"
                 + "**Este link será válido por " + tokenExpiration + " minutos.**\n\n"
                 + "Caso não tenha solicitado esta alteração, ignore este e-mail ou entre em contato com nosso suporte.\n\n"
                 + "Atenciosamente,\n"
