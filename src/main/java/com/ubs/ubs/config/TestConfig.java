@@ -67,8 +67,8 @@ public class TestConfig {
         // Cria usuários de teste
         Patient patient = new Patient(
                 null,
-                "John Doe",
-                "patient@test.com",
+                "Julio Donofreo Morais",
+                "julio.bibico.jdm@gmail.com",
                 passwordEncoder.encode("maria"),
                 "123456789",
                 Instant.parse("1990-05-15T00:00:00Z"),

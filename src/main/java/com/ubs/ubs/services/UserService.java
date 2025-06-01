@@ -1,15 +1,16 @@
 package com.ubs.ubs.services;
 
 import com.ubs.ubs.dtos.*;
-import com.ubs.ubs.entities.Doctor;
-import com.ubs.ubs.entities.Patient;
-import com.ubs.ubs.entities.Role;
-import com.ubs.ubs.entities.User;
+import com.ubs.ubs.entities.*;
 import com.ubs.ubs.projections.UserDetailsProjection;
+import com.ubs.ubs.repositories.PasswordRecoverRepository;
 import com.ubs.ubs.repositories.UserRepository;
 import com.ubs.ubs.services.exceptions.CustomNotFoundException;
 import com.ubs.ubs.services.exceptions.ForbiddenException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,8 +19,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.UUID;
 
 import static com.ubs.ubs.services.utils.ServiceErrorMessages.USER_NOT_FOUND;
 
@@ -32,6 +37,20 @@ public class UserService implements UserDetailsService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordRecoverRepository passwordRecoverRepository;
+
+    @Value("${email.password-recover.token.minutes}")
+    private Long tokenExpiration;
+
+    @Value("${email.password-recover.uri}")
+    private String recoverUri;
+
+    @Autowired
+    private EmailService emailService;
 
 
     @Override
@@ -104,4 +123,44 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    @Transactional
+    public void createRecoverToken(EmailDTO body) {
+
+        User user = userRepository.findByEmail(body.getEmail()).get();
+        if (user == null){
+            throw new ResourceNotFoundException("Email não encontrado.");
+        }
+
+        PasswordRecover entity = new PasswordRecover();
+        String token = UUID.randomUUID().toString();
+
+        entity.setEmail(body.getEmail());
+        entity.setToken(token);
+        entity.setExpiration(Instant.now().plus(tokenExpiration, ChronoUnit.MINUTES));
+        entity = passwordRecoverRepository.save(entity);
+
+        String message = "Prezado(a) " + user.getName() + ",\n\n"
+                + "Para redefinir sua senha, clique no link abaixo:\n"
+                + recoverUri + token + "\n\n"
+                + "**Este link será válido por " + tokenExpiration + " minutos.**\n\n"
+                + "Caso não tenha solicitado esta alteração, ignore este e-mail ou entre em contato com nosso suporte.\n\n"
+                + "Atenciosamente,\n"
+                + "Equipe MedPlus";
+
+        emailService.sendEmail(body.getEmail(), "Medplus - redefinição de Senha: Link válido por " + tokenExpiration + " minutos", message);
+    }
+
+    @Transactional
+    public void saveNewPassword(NewPasswordDTO body) {
+        List<PasswordRecover> tokens = passwordRecoverRepository.searchValidTokens(body.getToken(), Instant.now());
+        if(tokens.isEmpty()){
+            throw new ResourceNotFoundException("Token inválido.");
+        }
+
+        String email = tokens.get(tokens.size() - 1).getEmail();
+        User user = userRepository.findByEmail(email).get();
+        user.setPassword(passwordEncoder.encode(body.getPassword()));
+
+        userRepository.save(user);
+    }
 }
