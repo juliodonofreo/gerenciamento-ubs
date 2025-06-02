@@ -38,7 +38,7 @@ public class HealthUnitController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_UNIT')")
     public HealthUnitResponseDTO update(@PathVariable Long id, @Valid @RequestBody HealthUnitUpdateDTO dto) {
         return service.update(id, dto);
     }

@@ -81,6 +81,10 @@ public class UserService implements UserDetailsService {
             return new UserFullDTO((Doctor) user);
         }
 
+        if(user instanceof HealthUnit){
+            return new UserFullDTO((HealthUnit) user);
+        }
+
         return new UserFullDTO(user);
     }
 

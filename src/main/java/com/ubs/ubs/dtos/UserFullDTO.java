@@ -1,6 +1,7 @@
 package com.ubs.ubs.dtos;
 
 import com.ubs.ubs.entities.Doctor;
+import com.ubs.ubs.entities.HealthUnit;
 import com.ubs.ubs.entities.Patient;
 import com.ubs.ubs.entities.User;
 import com.ubs.ubs.entities.enums.Specialization;
@@ -65,6 +66,16 @@ public class UserFullDTO {
         specialization = entity.getSpecialization();
         crm = entity.getCrm();
         healthUnitId = entity.getHealthUnit().getId();
+
+        entity.getRoles().forEach((x) -> roles.add(x.getAuthority()));
+    }
+
+    public UserFullDTO(HealthUnit entity){
+        id = entity.getId();
+        name = entity.getName();
+        email = entity.getEmail();
+        address = entity.getAddress();
+        phone = entity.getPhone();
 
         entity.getRoles().forEach((x) -> roles.add(x.getAuthority()));
     }

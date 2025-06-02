@@ -54,30 +54,54 @@ public class HealthUnitService {
                 .toList();
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public HealthUnitResponseDTO update(Long id, HealthUnitUpdateDTO dto) {
         HealthUnit unit = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Unidade não encontrada"));
+                .orElseThrow(() -> new EntityNotFoundException("Unidade de saúde não encontrada"));
 
-        // Verifica se o novo email já está em uso por outra unidade
-        if (dto.email() != null && !unit.getEmail().equals(dto.email())) {
-            if (repository.existsByEmail(dto.email())) {
-                throw new IllegalArgumentException("Email já está em uso");
-            }
-            unit.setEmail(dto.email());
-        }
-
-        if (dto.name() != null) unit.setName(dto.name());
-        if (dto.phone() != null) unit.setPhone(dto.phone());
-        if (dto.address() != null) unit.setAddress(dto.address());
-
-        // Atualiza a senha apenas se for fornecida
-        if (dto.password() != null && !dto.password().isBlank()) {
-            unit.setPassword(passwordEncoder.encode(dto.password()));
-        }
+        updateEmail(unit, dto.email());
+        updateName(unit, dto.name());
+        updatePhone(unit, dto.phone());
+        updateAddress(unit, dto.address());
+        updatePassword(unit, dto.password());
 
         HealthUnit updatedUnit = repository.save(unit);
         return convertToDTO(updatedUnit);
+    }
+
+    private void updateEmail(HealthUnit unit, String newEmail) {
+        if (newEmail == null || newEmail.equals(unit.getEmail())) {
+            return;
+        }
+
+        if (repository.existsByEmail(newEmail)) {
+            throw new IllegalArgumentException("Email já está em uso por outra unidade");
+        }
+        unit.setEmail(newEmail);
+    }
+
+    private void updateName(HealthUnit unit, String newName) {
+        if (newName != null) {
+            unit.setName(newName);
+        }
+    }
+
+    private void updatePhone(HealthUnit unit, String newPhone) {
+        if (newPhone != null) {
+            unit.setPhone(newPhone);
+        }
+    }
+
+    private void updateAddress(HealthUnit unit, String newAddress) {
+        if (newAddress != null) {
+            unit.setAddress(newAddress);
+        }
+    }
+
+    private void updatePassword(HealthUnit unit, String newPassword) {
+        if (newPassword != null && !newPassword.isBlank()) {
+            String encodedPassword = passwordEncoder.encode(newPassword);
+            unit.setPassword(encodedPassword);
+        }
     }
 
     private HealthUnitResponseDTO convertToDTO(HealthUnit unit) {
