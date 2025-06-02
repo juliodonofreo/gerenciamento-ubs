@@ -123,16 +123,20 @@ public class PatientService {
                 .orElseThrow(() -> new EntityNotFoundException("Patient not found with id: " + id));
 
         User user = userService.getCurrentUser();
-        if (!user.hasRole("ROLE_ADMIN")) {
-            // Verifica se é staff da mesma unidade
+
+        boolean isOwnProfile = user.getId().equals(patient.getId());
+
+        if (!user.hasRole("ROLE_ADMIN") && !isOwnProfile) {
             if (user.hasRole("ROLE_STAFF")) {
                 Staff staff = (Staff) user;
                 if (!staff.getHealthUnit().getId().equals(patient.getHealthUnit().getId())) {
                     throw new AccessDeniedException("Unauthorized to update this patient");
                 }
             }
-            // Verifica se é a própria unidade
             else if (user.hasRole("ROLE_UNIT") && !patient.getHealthUnit().getId().equals(user.getId())) {
+                throw new AccessDeniedException("Unauthorized to update this patient");
+            }
+            else {
                 throw new AccessDeniedException("Unauthorized to update this patient");
             }
         }
@@ -141,13 +145,23 @@ public class PatientService {
         if (dto.getName() != null) {
             patient.setName(dto.getName());
         }
+        if (dto.getPassword() != null) {
+            patient.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
         if (dto.getBirth_date() != null) {
             patient.setBirth_date(dto.getBirth_date());
         }
-        if (dto.getAddress() != null){
+        if(dto.getEmail() != null){
+            patient.setEmail(dto.getEmail());
+        }
+        if (dto.getAddress() != null) {
             patient.setAddress(dto.getAddress());
         }
-        if (dto.getHealthUnitId() != null) {
+        if (dto.getPhone() != null) {
+            patient.setPhone(dto.getPhone());
+        }
+        // Restringe atualização de unidade de saúde apenas para staff/admin
+        if (dto.getHealthUnitId() != null && !isOwnProfile) {
             HealthUnit newUnit = healthUnitRepository.findById(dto.getHealthUnitId())
                     .orElseThrow(() -> new EntityNotFoundException("Health Unit not found"));
             patient.setHealthUnit(newUnit);

@@ -39,7 +39,7 @@ public class PatientController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_UNIT', 'ROLE_STAFF')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_UNIT', 'ROLE_STAFF', 'ROLE_PATIENT')")
     public PatientResponseDTO update(@PathVariable Long id, @Valid @RequestBody PatientUpdateDTO dto) {
         return patientService.update(id, dto);
     }

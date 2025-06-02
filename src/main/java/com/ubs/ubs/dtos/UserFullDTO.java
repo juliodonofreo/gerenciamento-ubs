@@ -21,6 +21,7 @@ public class UserFullDTO {
     private Specialization specialization;
     private String crm;
     private String phone;
+    private String address;
 
 
     private final List<String> roles = new ArrayList<>();
@@ -50,6 +51,7 @@ public class UserFullDTO {
         birth_date = entity.getBirth_date();
         cpf = entity.getCpf();
         phone = entity.getPhone();
+        address = entity.getAddress();
 
         entity.getRoles().forEach((x) -> roles.add(x.getAuthority()));
     }
@@ -90,6 +92,10 @@ public class UserFullDTO {
 
     public String getPhone() {
         return phone;
+    }
+
+    public String getAddress() {
+        return address;
     }
 
     public String getCrm() {

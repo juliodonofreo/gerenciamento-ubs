@@ -70,10 +70,10 @@ public class TestConfig {
                 "Julio Donofreo Morais",
                 "julio.bibico.jdm@gmail.com",
                 passwordEncoder.encode("maria"),
-                "123456789",
+                "02224849001",
                 Instant.parse("1990-05-15T00:00:00Z"),
                 healthUnitInstance,
-                null,
+                "Jardim das flores, 137",
                 "(28) 2616-8855"
         );
         patient.addRole(rolePatient);
