@@ -22,6 +22,7 @@ public class UserFullDTO {
     private String crm;
     private String phone;
     private String address;
+    private Long healthUnitId;
 
 
     private final List<String> roles = new ArrayList<>();
@@ -52,6 +53,7 @@ public class UserFullDTO {
         cpf = entity.getCpf();
         phone = entity.getPhone();
         address = entity.getAddress();
+        healthUnitId = entity.getHealthUnit().getId();
 
         entity.getRoles().forEach((x) -> roles.add(x.getAuthority()));
     }
@@ -62,6 +64,7 @@ public class UserFullDTO {
         email = entity.getEmail();
         specialization = entity.getSpecialization();
         crm = entity.getCrm();
+        healthUnitId = entity.getHealthUnit().getId();
 
         entity.getRoles().forEach((x) -> roles.add(x.getAuthority()));
     }
@@ -96,6 +99,10 @@ public class UserFullDTO {
 
     public String getAddress() {
         return address;
+    }
+
+    public Long getHealthUnitId() {
+        return healthUnitId;
     }
 
     public String getCrm() {

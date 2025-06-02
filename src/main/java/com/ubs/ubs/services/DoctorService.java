@@ -108,30 +108,49 @@ public class DoctorService {
                 .orElseThrow(() -> new EntityNotFoundException("Doctor not found with id: " + id));
 
         User user = userService.getCurrentUser();
-        if (!user.hasRole("ROLE_ADMIN")) {
-            // Verifica se a unidade do médico pertence ao usuário
+
+        boolean isOwnProfile = user.getId().equals(doctor.getId());
+
+        if (!user.hasRole("ROLE_ADMIN") && !isOwnProfile) {
             if (user.hasRole("ROLE_UNIT") && !doctor.getHealthUnit().getId().equals(user.getId())) {
+                throw new AccessDeniedException("Unauthorized to update this doctor");
+            }
+
+            else if (!user.hasRole("ROLE_UNIT")) {
                 throw new AccessDeniedException("Unauthorized to update this doctor");
             }
         }
 
-        // Atualiza campos permitidos
+        System.out.println(dto.getEmail());
+
         if (dto.getName() != null) {
             doctor.setName(dto.getName());
         }
-        if(dto.getCrm() != null){
+
+        if (dto.getEmail() != null){
+            doctor.setEmail(dto.getEmail());
+        }
+
+        if (dto.getCrm() != null && !isOwnProfile) {
             doctor.setCrm(dto.getCrm());
         }
+
         if (dto.getSpecialization() != null) {
             doctor.setSpecialization(dto.getSpecialization());
         }
-        if (dto.getHealthUnitId() != null) {
+
+        if (dto.getHealthUnitId() != null && !isOwnProfile) {
             HealthUnit newUnit = healthUnitRepository.findById(dto.getHealthUnitId())
                     .orElseThrow(() -> new EntityNotFoundException("Health Unit not found"));
             doctor.setHealthUnit(newUnit);
         }
 
-        return new DoctorResponseDTO(doctorRepository.save(doctor));
+        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+            doctor.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+
+        Doctor updatedDoctor = doctorRepository.save(doctor);
+        return new DoctorResponseDTO(updatedDoctor);
     }
 
     @Transactional
