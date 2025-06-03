@@ -15,6 +15,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/appointments")
@@ -23,7 +24,7 @@ public class AppointmentController {
     @Autowired
     private AppointmentService service;
 
-    @PreAuthorize("hasRole('ROLE_UNIT')") // Alterado para ROLE_UNIT
+    @PreAuthorize("hasAnyRole('ROLE_UNIT', 'ROLE_STAFF')")
     @GetMapping
     public ResponseEntity<List<AppointmentGetDTO>> findAllByHealthUnit(){
         return ResponseEntity.ok().body(service.findAllByHealthUnit());
@@ -70,5 +71,19 @@ public class AppointmentController {
             @PathVariable Long id,
             @RequestBody @Valid AppointmentConcludeDTO dto) {
         return ResponseEntity.ok().body(service.concludeAppointment(id, dto));
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_UNIT', 'ROLE_STAFF')")
+    @GetMapping("/week-summary")
+    public ResponseEntity<Map<String, Long>> getAppointmentsWeekSummary() {
+        Map<String, Long> weekSummary = service.getAppointmentsCountForCurrentWeekByDay();
+        return ResponseEntity.ok(weekSummary);
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_STAFF', 'ROLE_UNIT', 'ROLE_DOCTOR')") // Ajuste as roles conforme necessário
+    @GetMapping("/today")
+    public ResponseEntity<List<AppointmentGetDTO>> getTodaysAppointments() {
+        List<AppointmentGetDTO> todaysAppointments = service.getTodaysAppointmentsForCurrentUserUnit();
+        return ResponseEntity.ok(todaysAppointments);
     }
 }

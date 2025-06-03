@@ -1,9 +1,6 @@
 package com.ubs.ubs.dtos;
 
-import com.ubs.ubs.entities.Doctor;
-import com.ubs.ubs.entities.HealthUnit;
-import com.ubs.ubs.entities.Patient;
-import com.ubs.ubs.entities.User;
+import com.ubs.ubs.entities.*;
 import com.ubs.ubs.entities.enums.Specialization;
 
 import java.time.Instant;
@@ -24,6 +21,7 @@ public class UserFullDTO {
     private String phone;
     private String address;
     private Long healthUnitId;
+    private String healthUnitName;
 
 
     private final List<String> roles = new ArrayList<>();
@@ -76,6 +74,16 @@ public class UserFullDTO {
         email = entity.getEmail();
         address = entity.getAddress();
         phone = entity.getPhone();
+
+        entity.getRoles().forEach((x) -> roles.add(x.getAuthority()));
+    }
+
+    public UserFullDTO(Staff entity){
+        id = entity.getId();
+        name = entity.getName();
+        email = entity.getEmail();
+        healthUnitId = entity.getHealthUnit().getId();
+        healthUnitName = entity.getHealthUnit().getName();
 
         entity.getRoles().forEach((x) -> roles.add(x.getAuthority()));
     }
@@ -135,6 +143,10 @@ public class UserFullDTO {
 
     public Specialization getSpecialization() {
         return specialization;
+    }
+
+    public String getHealthUnitName() {
+        return healthUnitName;
     }
 
     public List<String> getRoles() {

@@ -1,5 +1,6 @@
 package com.ubs.ubs.services;
 
+import com.twilio.rest.microvisor.v1.App;
 import com.ubs.ubs.dtos.AppointmentConcludeDTO;
 import com.ubs.ubs.dtos.AppointmentGetDTO;
 import com.ubs.ubs.dtos.AppointmentInsertDTO;
@@ -18,13 +19,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,6 +47,10 @@ public class AppointmentService {
 
     @Autowired
     private ExamRepository examRepository;
+
+    private static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
+
+    private static final ZoneId APP_ZONE_ID = ZoneId.of("America/Sao_Paulo"); // Ou ZoneId.systemDefault();
 
 
 
@@ -242,13 +246,92 @@ public class AppointmentService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<AppointmentGetDTO> findAllByHealthUnit() {
-        HealthUnit healthUnit = (HealthUnit) userService.getCurrentUser();
+        User currentUser = userService.getCurrentUser(); // This should return the specific user type
+        Long healthUnitIdToQuery = null;
 
-        return appointmentRepository.findByDoctorHealthUnitOrPatientHealthUnit(healthUnit.getId())
+        if (currentUser instanceof HealthUnit healthUnitUser) {
+            healthUnitIdToQuery = healthUnitUser.getId();
+        } else if (currentUser instanceof Staff staffUser) {
+            if (staffUser.getHealthUnit() != null) {
+                healthUnitIdToQuery = staffUser.getHealthUnit().getId();
+            } else {
+                System.err.println("Warning: Staff user " + staffUser.getUsername() + " is not associated with a Health Unit.");
+                return Collections.emptyList();
+            }
+        } else {
+            throw new AccessDeniedException("User type not authorized to retrieve appointments by health unit.");
+        }
+
+        if (healthUnitIdToQuery == null) {
+            System.err.println("Error: Could not determine Health Unit ID for current user.");
+            return Collections.emptyList();
+        }
+
+        return appointmentRepository.findByDoctorHealthUnitOrPatientHealthUnit(healthUnitIdToQuery)
                 .stream()
                 .map(AppointmentGetDTO::new)
-                .toList();
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Long> getAppointmentsCountForCurrentWeekByDay() {
+        User currentUser = userService.getCurrentUser();
+        Long healthUnitId;
+
+        if (currentUser instanceof HealthUnit) {
+            healthUnitId = ((HealthUnit) currentUser).getId();
+        } else if (currentUser instanceof Staff) {
+            Staff staffUser = (Staff) currentUser;
+            if (staffUser.getHealthUnit() != null) {
+                healthUnitId = staffUser.getHealthUnit().getId();
+            } else {
+                throw new IllegalStateException("Staff user " + staffUser.getUsername() + " is not associated with a Health Unit for this operation.");
+            }
+        } else {
+            throw new AccessDeniedException("User type not authorized for weekly summary.");
+        }
+
+        LocalDate today = LocalDate.now(DEFAULT_ZONE_ID); // Usar a zona padrão
+        LocalDate startOfWeekDate = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate endOfWeekDate = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+
+        // Converter LocalDate para Instant no início do dia para startOfWeekDate
+        // e início do dia SEGUINTE a endOfWeekDate para o limite superior (exclusive)
+        Instant startOfWeekInstant = startOfWeekDate.atStartOfDay(DEFAULT_ZONE_ID).toInstant();
+        Instant endOfWeekExclusiveInstant = endOfWeekDate.plusDays(1).atStartOfDay(DEFAULT_ZONE_ID).toInstant();
+
+
+        List<Appointment> appointmentsThisWeek = appointmentRepository
+                .findByHealthUnitIdAndDateBetweenAndStatusNot(
+                        healthUnitId,
+                        startOfWeekInstant,
+                        endOfWeekExclusiveInstant,
+                        AppointmentState.CANCELADO
+                );
+
+        Map<DayOfWeek, Long> countsByDayOfWeek = appointmentsThisWeek.stream()
+                .filter(app -> app.getDate() != null)
+                .collect(Collectors.groupingBy(
+                        // Converter o Instant do agendamento para LocalDate NA ZONA CORRETA para obter o DayOfWeek
+                        app -> app.getDate().atZone(DEFAULT_ZONE_ID).toLocalDate().getDayOfWeek(),
+                        Collectors.counting()
+                ));
+
+        Map<String, Long> result = new LinkedHashMap<>();
+        DayOfWeek[] weekOrder = {
+                DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY,
+                DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY
+        };
+        String[] dayLabels = {"Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"};
+
+        for (int i = 0; i < weekOrder.length; i++) {
+            DayOfWeek day = weekOrder[i];
+            String dayLabel = dayLabels[i];
+            result.put(dayLabel, countsByDayOfWeek.getOrDefault(day, 0L));
+        }
+        return result;
     }
 
     public AppointmentGetDTO concludeAppointment(Long id, AppointmentConcludeDTO dto) {
@@ -294,6 +377,52 @@ public class AppointmentService {
 
         return appointments.stream()
                 .map(AppointmentGetDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<AppointmentGetDTO> getTodaysAppointmentsForCurrentUserUnit() {
+        User currentUser = userService.getCurrentUser();
+        Long healthUnitId;
+
+        if (currentUser instanceof Staff) {
+            Staff staffUser = (Staff) currentUser;
+            if (staffUser.getHealthUnit() != null) {
+                healthUnitId = staffUser.getHealthUnit().getId();
+            } else {
+                throw new IllegalStateException("Staff user " + staffUser.getUsername() + " não está associado a uma Unidade de Saúde.");
+            }
+        } else if (currentUser instanceof HealthUnit) { // Se a unidade logar, ela vê seus próprios agendamentos
+            healthUnitId = ((HealthUnit) currentUser).getId();
+        }
+        else {
+            // Poderia permitir para Admin ver de uma unidade específica, ou lançar exceção
+            throw new AccessDeniedException("Tipo de usuário não autorizado para esta operação.");
+        }
+
+        LocalDate today = LocalDate.now(APP_ZONE_ID);
+        Instant startOfDay = today.atStartOfDay(APP_ZONE_ID).toInstant();
+        Instant endOfDay = today.atTime(LocalTime.MAX).atZone(APP_ZONE_ID).toInstant(); // Fim do dia (23:59:59.999...)
+        // Alternativa para endOfDay se a query usa '<':
+        // Instant endOfDay = today.plusDays(1).atStartOfDay(APP_ZONE_ID).toInstant();
+
+
+        List<AppointmentState> relevantStatuses = Arrays.asList(
+                AppointmentState.AGENDADO,
+                AppointmentState.CANCELADO,
+                AppointmentState.CONCLUIDO
+        );
+
+        List<Appointment> appointments = appointmentRepository
+                .findByHealthUnitIdAndDayAndStatusesOrderByDate(
+                        healthUnitId,
+                        startOfDay,
+                        endOfDay, // Se a query for a.date < endOfDayInstant, use today.plusDays(1).atStartOfDay...
+                        relevantStatuses
+                );
+
+        return appointments.stream()
+                .map(AppointmentGetDTO::new) // Certifique-se que o DTO é adequado
                 .collect(Collectors.toList());
     }
 }

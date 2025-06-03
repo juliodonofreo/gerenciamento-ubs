@@ -5,6 +5,7 @@ import com.ubs.ubs.dtos.DoctorResponseDTO;
 import com.ubs.ubs.dtos.DoctorUpdateDTO;
 import com.ubs.ubs.entities.Doctor;
 import com.ubs.ubs.entities.HealthUnit;
+import com.ubs.ubs.entities.Staff;
 import com.ubs.ubs.entities.User;
 import com.ubs.ubs.repositories.DoctorRepository;
 import com.ubs.ubs.repositories.HealthUnitRepository;
@@ -58,13 +59,19 @@ public class DoctorService {
         return new DoctorResponseDTO(doctorRepository.save(doctor));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_UNIT')")
     @Transactional(readOnly = true)
     public List<DoctorResponseDTO> findAll() {
         User user = userService.getCurrentUser();
 
         if (user.hasRole("ROLE_ADMIN")) {
             return doctorRepository.findAll().stream()
+                    .map(DoctorResponseDTO::new)
+                    .toList();
+        }
+
+        if (user.hasRole("ROLE_STAFF")){
+            Staff staff = (Staff) user;
+            return doctorRepository.findByHealthUnitId(staff.getHealthUnit().getId()).stream()
                     .map(DoctorResponseDTO::new)
                     .toList();
         }

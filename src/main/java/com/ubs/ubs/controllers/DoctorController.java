@@ -28,7 +28,7 @@ public class DoctorController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_UNIT')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_UNIT', 'ROLE_STAFF')")
     public List<DoctorResponseDTO> findAll() {
         return doctorService.findAll();
     }
