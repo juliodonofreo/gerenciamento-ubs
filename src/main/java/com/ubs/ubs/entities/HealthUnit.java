@@ -25,13 +25,13 @@ public class HealthUnit extends User {
     @OneToMany(mappedBy = "healthUnit")
     private List<Staff> staff = new ArrayList<>();
 
-    private boolean reminderEnabled;
+    private Boolean reminderEnabled;
     private Integer reminderLeadTimeValue;
 
     @Enumerated(EnumType.STRING)
     private ReminderTimeUnit reminderLeadTimeUnit; // HOURS ou MINUTES
 
-    private boolean useCustomReminderTemplate;
+    private Boolean useCustomReminderTemplate;
 
     @Lob // Indica que é um objeto grande, adequado para textos mais longos
     private String customReminderTemplate;
@@ -45,7 +45,7 @@ public class HealthUnit extends User {
         this.address = address;
     }
 
-    public HealthUnit(Long id, String name, String email, String password, String phone, String address, boolean reminderEnabled, ReminderTimeUnit reminderLeadTimeUnit, Integer reminderLeadTimeValue, boolean useCustomReminderTemplate, String customReminderTemplate) {
+    public HealthUnit(Long id, String name, String email, String password, String phone, String address, Boolean reminderEnabled, ReminderTimeUnit reminderLeadTimeUnit, Integer reminderLeadTimeValue, Boolean useCustomReminderTemplate, String customReminderTemplate) {
         super(id, name, email, password);
         this.phone = phone;
         this.address = address;
@@ -66,11 +66,11 @@ public class HealthUnit extends User {
         return staff;
     }
 
-    public boolean isReminderEnabled() {
+    public Boolean isReminderEnabled() {
         return reminderEnabled;
     }
 
-    public void setReminderEnabled(boolean reminderEnabled) {
+    public void setReminderEnabled(Boolean reminderEnabled) {
         this.reminderEnabled = reminderEnabled;
     }
 
@@ -82,11 +82,11 @@ public class HealthUnit extends User {
         this.reminderLeadTimeValue = reminderLeadTimeValue;
     }
 
-    public boolean isUseCustomReminderTemplate() {
+    public Boolean isUseCustomReminderTemplate() {
         return useCustomReminderTemplate;
     }
 
-    public void setUseCustomReminderTemplate(boolean useCustomReminderTemplate) {
+    public void setUseCustomReminderTemplate(Boolean useCustomReminderTemplate) {
         this.useCustomReminderTemplate = useCustomReminderTemplate;
     }
 
