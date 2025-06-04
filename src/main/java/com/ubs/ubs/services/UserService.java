@@ -70,6 +70,7 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
+    @Transactional
     public UserFullDTO currentUserDTO(){
         User user = getCurrentUser();
 
@@ -92,6 +93,7 @@ public class UserService implements UserDetailsService {
         return new UserFullDTO(user);
     }
 
+    @Transactional
     public User getCurrentUser(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
