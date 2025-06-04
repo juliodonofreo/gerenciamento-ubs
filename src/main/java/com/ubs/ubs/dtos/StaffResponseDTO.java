@@ -10,7 +10,8 @@ public record StaffResponseDTO(
         String name,
         String email,
         HealthUnitDTO healthUnit,
-        List<RoleDTO> roles
+        List<RoleDTO> roles,
+        String type
 ) {
     public StaffResponseDTO(Staff staff) {
         this(
@@ -18,7 +19,8 @@ public record StaffResponseDTO(
                 staff.getName(),
                 staff.getEmail(),
                 new HealthUnitDTO(staff.getHealthUnit()),
-                staff.getRoles().stream().map(RoleDTO::new).toList()
+                staff.getRoles().stream().map(RoleDTO::new).toList(),
+                staff.getType()
         );
     }
 

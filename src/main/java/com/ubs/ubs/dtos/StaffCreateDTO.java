@@ -6,5 +6,6 @@ public record StaffCreateDTO(
         @NotBlank String name,
         @NotBlank @Email String email,
         @NotBlank String password,
-        @NotNull Long healthUnitId
+        @NotNull Long healthUnitId,
+        String type
 ) {}

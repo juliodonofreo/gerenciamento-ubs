@@ -22,6 +22,7 @@ public class UserFullDTO {
     private String address;
     private Long healthUnitId;
     private String healthUnitName;
+    private String type;
 
 
     private final List<String> roles = new ArrayList<>();
@@ -84,6 +85,7 @@ public class UserFullDTO {
         email = entity.getEmail();
         healthUnitId = entity.getHealthUnit().getId();
         healthUnitName = entity.getHealthUnit().getName();
+        type = entity.getType();
 
         entity.getRoles().forEach((x) -> roles.add(x.getAuthority()));
     }
@@ -151,5 +153,9 @@ public class UserFullDTO {
 
     public List<String> getRoles() {
         return roles;
+    }
+
+    public String getType() {
+        return type;
     }
 }

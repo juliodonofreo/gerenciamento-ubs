@@ -9,22 +9,35 @@ import jakarta.persistence.ManyToOne;
 @DiscriminatorValue("STAFF")
 public class Staff extends User {
 
+
+    private String type;
+
     @ManyToOne
     @JoinColumn(name = "health_unit_id")
     private HealthUnit healthUnit;
 
     public Staff() {
     }
-    public Staff(Long id, String name, String email, String password, HealthUnit healthUnit) {
+    public Staff(Long id, String name, String email, String password, HealthUnit healthUnit, String type) {
         super(id, name, email, password);
         this.healthUnit = healthUnit;
+        this.type = type;
     }
 
 
-    public Staff(Long id, String name, String email, String password) {
+    public Staff(Long id, String name, String email, String password, String type) {
         super(id, name, email, password);
+        this.type = type;
     }
 
     public HealthUnit getHealthUnit() { return healthUnit; }
     public void setHealthUnit(HealthUnit healthUnit) { this.healthUnit = healthUnit; }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 }

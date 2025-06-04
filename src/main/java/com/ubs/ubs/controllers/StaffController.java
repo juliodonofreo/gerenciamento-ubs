@@ -33,7 +33,7 @@ public class StaffController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_UNIT')")
+    @PreAuthorize("hasAnyRole('ROLE_STAFF', 'ROLE_UNIT')")
     public StaffResponseDTO update(@PathVariable Long id, @Valid @RequestBody StaffUpdateDTO dto) {
         return service.update(id, dto);
     }

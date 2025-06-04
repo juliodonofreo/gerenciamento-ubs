@@ -58,13 +58,24 @@ public class StaffService {
         return new StaffResponseDTO(repository.save(staff));
     }
 
-    @PreAuthorize("hasRole('ROLE_UNIT')")
     public StaffResponseDTO update(Long id, StaffUpdateDTO dto) {
         Staff staff = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Staff not found"));
 
-        if (dto.name() != null) {
-            staff.setName(dto.name());
+        if (dto.getEmail() != null){
+            staff.setEmail(dto.getEmail());
+        }
+
+        if (dto.getName() != null) {
+            staff.setName(dto.getName());
+        }
+
+        if (dto.getPassword() != null){
+            staff.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+
+        if (dto.getType() != null){
+            staff.setType(staff.getType());
         }
 
         return new StaffResponseDTO(repository.save(staff));
