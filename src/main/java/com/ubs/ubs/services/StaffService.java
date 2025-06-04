@@ -52,6 +52,7 @@ public class StaffService {
         staff.setEmail(dto.email());
         staff.setPassword(passwordEncoder.encode(dto.password()));
         staff.setHealthUnit(healthUnit);
+        staff.setType(dto.type());
 
         staff.getRoles().add(roleRepository.findByAuthority("ROLE_STAFF").get());
 
@@ -75,7 +76,7 @@ public class StaffService {
         }
 
         if (dto.getType() != null){
-            staff.setType(staff.getType());
+            staff.setType(dto.getType());
         }
 
         return new StaffResponseDTO(repository.save(staff));

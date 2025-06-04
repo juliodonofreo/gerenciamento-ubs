@@ -105,7 +105,7 @@ public class TestConfig {
                 "ana.silva@ubs.com",
                 passwordEncoder.encode("maria"),
                healthUnitInstance,
-                "Enfermeira"
+                "enfermeiro"
         );
         staff.addRole(roleStaff);
 
