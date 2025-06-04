@@ -1,6 +1,7 @@
 package com.ubs.ubs.repositories;
 
 import com.ubs.ubs.entities.Appointment;
+import com.ubs.ubs.entities.HealthUnit;
 import com.ubs.ubs.entities.enums.AppointmentState;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -47,4 +48,17 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("startOfDayInstant") Instant startOfDayInstant,
             @Param("endOfDayInstant") Instant endOfDayInstant,
             @Param("statuses") List<AppointmentState> statuses
-    );}
+    );
+
+    @Query("SELECT a FROM Appointment a " +
+            "JOIN FETCH a.patient p " +
+            "JOIN FETCH a.doctor d " +
+            "JOIN FETCH d.healthUnit hu " +
+            "WHERE hu = :healthUnit " +
+            "AND a.date BETWEEN :startDateTime AND :endDateTime " +
+            "AND a.reminderSentAt IS NULL")
+    List<Appointment> findAppointmentsForReminder(
+            @Param("healthUnit") HealthUnit healthUnit,
+            @Param("startDateTime") Instant startDateTime,
+            @Param("endDateTime") Instant endDateTime);
+}

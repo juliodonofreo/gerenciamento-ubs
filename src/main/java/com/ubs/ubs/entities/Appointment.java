@@ -27,6 +27,8 @@ public class Appointment {
     @JoinColumn(name = "doctor_id")
     private Doctor doctor;
 
+    private Instant reminderSentAt;
+
 
     public Appointment() {
     }
@@ -96,4 +98,11 @@ public class Appointment {
         this.doctor = doctor;
     }
 
+    public Instant getReminderSentAt() {
+        return reminderSentAt;
+    }
+
+    public void setReminderSentAt(Instant reminderSentAt) {
+        this.reminderSentAt = reminderSentAt;
+    }
 }

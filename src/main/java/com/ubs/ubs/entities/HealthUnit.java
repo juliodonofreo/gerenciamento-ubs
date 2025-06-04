@@ -1,9 +1,8 @@
 package com.ubs.ubs.entities;
 
 import com.ubs.ubs.entities.User;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.OneToMany;
+import com.ubs.ubs.entities.enums.ReminderTimeUnit;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -26,6 +25,17 @@ public class HealthUnit extends User {
     @OneToMany(mappedBy = "healthUnit")
     private List<Staff> staff = new ArrayList<>();
 
+    private boolean reminderEnabled;
+    private Integer reminderLeadTimeValue;
+
+    @Enumerated(EnumType.STRING)
+    private ReminderTimeUnit reminderLeadTimeUnit; // HOURS ou MINUTES
+
+    private boolean useCustomReminderTemplate;
+
+    @Lob // Indica que é um objeto grande, adequado para textos mais longos
+    private String customReminderTemplate;
+
     public HealthUnit() {
     }
 
@@ -35,7 +45,16 @@ public class HealthUnit extends User {
         this.address = address;
     }
 
-
+    public HealthUnit(Long id, String name, String email, String password, String phone, String address, boolean reminderEnabled, ReminderTimeUnit reminderLeadTimeUnit, Integer reminderLeadTimeValue, boolean useCustomReminderTemplate, String customReminderTemplate) {
+        super(id, name, email, password);
+        this.phone = phone;
+        this.address = address;
+        this.reminderEnabled = reminderEnabled;
+        this.reminderLeadTimeUnit = reminderLeadTimeUnit;
+        this.reminderLeadTimeValue = reminderLeadTimeValue;
+        this.useCustomReminderTemplate = useCustomReminderTemplate;
+        this.customReminderTemplate = customReminderTemplate;
+    }
 
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
@@ -45,5 +64,45 @@ public class HealthUnit extends User {
 
     public List<Staff> getStaff() {
         return staff;
+    }
+
+    public boolean isReminderEnabled() {
+        return reminderEnabled;
+    }
+
+    public void setReminderEnabled(boolean reminderEnabled) {
+        this.reminderEnabled = reminderEnabled;
+    }
+
+    public Integer getReminderLeadTimeValue() {
+        return reminderLeadTimeValue;
+    }
+
+    public void setReminderLeadTimeValue(Integer reminderLeadTimeValue) {
+        this.reminderLeadTimeValue = reminderLeadTimeValue;
+    }
+
+    public boolean isUseCustomReminderTemplate() {
+        return useCustomReminderTemplate;
+    }
+
+    public void setUseCustomReminderTemplate(boolean useCustomReminderTemplate) {
+        this.useCustomReminderTemplate = useCustomReminderTemplate;
+    }
+
+    public String getCustomReminderTemplate() {
+        return customReminderTemplate;
+    }
+
+    public void setCustomReminderTemplate(String customReminderTemplate) {
+        this.customReminderTemplate = customReminderTemplate;
+    }
+
+    public ReminderTimeUnit getReminderLeadTimeUnit() {
+        return reminderLeadTimeUnit;
+    }
+
+    public void setReminderLeadTimeUnit(ReminderTimeUnit reminderLeadTimeUnit) {
+        this.reminderLeadTimeUnit = reminderLeadTimeUnit;
     }
 }

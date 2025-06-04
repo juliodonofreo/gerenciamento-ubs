@@ -7,10 +7,7 @@ import com.ubs.ubs.dtos.AppointmentInsertDTO;
 import com.ubs.ubs.dtos.AppointmentUpdateDTO;
 import com.ubs.ubs.entities.*;
 import com.ubs.ubs.entities.enums.AppointmentState;
-import com.ubs.ubs.repositories.AppointmentRepository;
-import com.ubs.ubs.repositories.DoctorRepository;
-import com.ubs.ubs.repositories.ExamRepository;
-import com.ubs.ubs.repositories.PatientRepository;
+import com.ubs.ubs.repositories.*;
 import com.ubs.ubs.services.exceptions.CustomNotFoundException;
 import com.ubs.ubs.services.exceptions.ForbiddenException;
 import com.ubs.ubs.services.utils.ServiceErrorMessages;
@@ -23,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -48,11 +46,17 @@ public class AppointmentService {
     @Autowired
     private ExamRepository examRepository;
 
+    @Autowired
+    private HealthUnitRepository healthUnitRepository;
+
     private static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
 
     private static final ZoneId APP_ZONE_ID = ZoneId.of("America/Sao_Paulo"); // Ou ZoneId.systemDefault();
 
-
+    // Formatadores para as variáveis [Data] e [Hora]
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
+    private static final ZoneId SYSTEM_ZONE_ID = ZoneId.systemDefault();
 
     public List<AppointmentGetDTO> findAll(){
         List<Appointment> entities = appointmentRepository.findAll();
@@ -128,14 +132,11 @@ public class AppointmentService {
         User currentUser = userService.getCurrentUser();
         validatePermissions(currentUser, entity);
 
-        // Atualização básica dos campos
         updateCoreFields(entity, dto);
 
-        // Atualização de médico e paciente com validações
         updateDoctor(entity, dto);
         updatePatient(entity, dto);
 
-        // Validação final da unidade de saúde
         validateHealthUnitConsistency(entity);
 
         return new AppointmentGetDTO(appointmentRepository.save(entity));
@@ -215,35 +216,92 @@ public class AppointmentService {
         }
     }
 
-    @Scheduled(cron = "0 0 8 * * *")
+    @Scheduled(cron = "0 * * * * *") // A cada minuto
+    @Transactional
     public void checkAndSendAppointmentReminders() {
-        System.out.println("ENVIANDO EMAIL");
-        LocalDateTime tomorrow = LocalDateTime.now().plusDays(1);
-        Instant start = LocalDateTime.now().plusDays(1).withHour(0).withMinute(0)
-                .atZone(ZoneId.systemDefault()).toInstant();
+        System.out.println("INICIANDO VERIFICAÇÃO DE LEMBRETES DE CONSULTA (" + LocalDateTime.now() + ")");
 
-        Instant end = LocalDateTime.now().plusDays(1).withHour(23).withMinute(59)
-                .atZone(ZoneId.systemDefault()).toInstant();
-
-        List<Appointment> appointments = appointmentRepository.findByDateBetween(start, end);
-        System.out.println("Consultas: " + appointments);
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-
-        for (Appointment appointment : appointments) {
-            Patient patient = appointment.getPatient();
-            Doctor doctor = appointment.getDoctor();
-            ZonedDateTime zonedDateTime = appointment.getDate().atZone(ZoneId.systemDefault());
-            String formattedDate = zonedDateTime.format(formatter);
-
-            // Enviar email
-            emailService.sendAppointmentReminder(
-                    patient.getEmail(),
-                    patient.getName(),
-                    doctor.getName(),
-                    formattedDate
-            );
+        List<HealthUnit> activeUnits = healthUnitRepository.findByReminderEnabledTrue();
+        if (activeUnits.isEmpty()) {
+            System.out.println("Nenhuma unidade de saúde com lembretes ativos.");
+            return;
         }
+
+        Instant jobExecutionInstant = Instant.now();
+        Instant jobProcessingWindowEndInstant = jobExecutionInstant.plus(24, ChronoUnit.HOURS); // Cobre as próximas 24h
+
+        for (HealthUnit unit : activeUnits) {
+            if (unit.getReminderLeadTimeValue() == null || unit.getReminderLeadTimeUnit() == null) {
+                System.out.println("Unidade '" + unit.getName() + "' não possui configuração de antecedência. Pulando.");
+                continue;
+            }
+
+            System.out.println("Processando unidade: " + unit.getName());
+
+            long leadValue = unit.getReminderLeadTimeValue();
+            ChronoUnit leadChronoUnit = unit.getReminderLeadTimeUnit().toChronoUnit();
+
+            // Calcular o intervalo de datas DAS CONSULTAS para buscar:
+            // Data da consulta = (Momento do envio do lembrete) + Antecedência
+            // Momento do envio do lembrete está entre [jobExecutionInstant, jobProcessingWindowEndInstant)
+            Instant searchAppointmentsFromDate = jobExecutionInstant.plus(leadValue, leadChronoUnit);
+            Instant searchAppointmentsToDate = jobProcessingWindowEndInstant.plus(leadValue, leadChronoUnit).minusSeconds(1); // Exclusivo no final
+
+            System.out.printf("  Buscando consultas para %s entre %s e %s (data da consulta)\n",
+                    unit.getName(),
+                    LocalDateTime.ofInstant(searchAppointmentsFromDate, SYSTEM_ZONE_ID),
+                    LocalDateTime.ofInstant(searchAppointmentsToDate, SYSTEM_ZONE_ID));
+
+            List<Appointment> appointmentsToRemind = appointmentRepository.findAppointmentsForReminder(
+                    unit, searchAppointmentsFromDate, searchAppointmentsToDate);
+
+            System.out.println("  Consultas encontradas para " + unit.getName() + ": " + appointmentsToRemind.size());
+
+            for (Appointment appointment : appointmentsToRemind) {
+                Patient patient = appointment.getPatient();
+                Doctor doctor = appointment.getDoctor(); // Já vem com HealthUnit via JOIN FETCH
+
+                if (doctor.getHealthUnit() == null || !doctor.getHealthUnit().getId().equals(unit.getId())) {
+                    System.err.println("  ERRO DE LÓGICA: Consulta " + appointment.getId() +
+                            " não pertence à unidade esperada " + unit.getName() + ". Pulando.");
+                    continue;
+                }
+
+                ZonedDateTime appointmentZonedDateTime = appointment.getDate().atZone(SYSTEM_ZONE_ID);
+
+                Map<String, String> variables = new HashMap<>();
+                variables.put("Paciente", patient.getName());
+                variables.put("Data", appointmentZonedDateTime.format(DATE_FORMATTER));
+                variables.put("Hora", appointmentZonedDateTime.format(TIME_FORMATTER));
+                variables.put("Clínica", unit.getName());
+                variables.put("Médico", doctor.getName());
+                variables.put("Especialidade", doctor.getSpecialization() != null ? doctor.getSpecialization().getFormattedName() : "N/A");
+
+                try {
+                    if (unit.isUseCustomReminderTemplate() && unit.getCustomReminderTemplate() != null && !unit.getCustomReminderTemplate().isEmpty()) {
+                        emailService.sendCustomAppointmentReminder(
+                                patient.getEmail(),
+                                unit.getCustomReminderTemplate(),
+                                variables
+                        );
+                    } else {
+                        emailService.sendAppointmentReminder(
+                                patient.getEmail(),
+                                variables // O método padrão também usará o mapa
+                        );
+                    }
+
+                    appointment.setReminderSentAt(Instant.now());
+                    appointmentRepository.save(appointment); // Marcar como enviado
+                    System.out.println("  Lembrete enviado para: " + patient.getEmail() + " (Consulta ID: " + appointment.getId() + ")");
+
+                } catch (Exception e) {
+                    System.err.println("  FALHA AO ENVIAR LEMBRETE para consulta ID " + appointment.getId() +
+                            " (Paciente: " + patient.getEmail() + "): " + e.getMessage());
+                }
+            }
+        }
+        System.out.println("VERIFICAÇÃO DE LEMBRETES CONCLUÍDA (" + LocalDateTime.now() + ")");
     }
 
     @Transactional(readOnly = true)
