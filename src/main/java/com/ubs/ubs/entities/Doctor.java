@@ -4,7 +4,9 @@ import com.ubs.ubs.entities.enums.Specialization;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @DiscriminatorValue("DOCTOR")
@@ -21,6 +23,28 @@ public class Doctor extends User {
     @ManyToOne
     @JoinColumn(name = "health_unit_id")
     private HealthUnit healthUnit;
+
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<Schedule> schedules = new HashSet<>();
+
+
+    public Set<Schedule> getSchedules() {
+        return schedules;
+    }
+
+    public void setSchedules(Set<Schedule> schedules) {
+        this.schedules = schedules;
+    }
+
+    public void addSchedule(Schedule schedule) {
+        schedules.add(schedule);
+        schedule.setDoctor(this);
+    }
+
+    public void removeSchedule(Schedule schedule) {
+        schedules.remove(schedule);
+        schedule.setDoctor(null);
+    }
 
     public Doctor() {
     }
