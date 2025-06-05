@@ -3,10 +3,7 @@ package com.ubs.ubs.services;
 import com.ubs.ubs.dtos.DoctorCreateDTO;
 import com.ubs.ubs.dtos.DoctorResponseDTO;
 import com.ubs.ubs.dtos.DoctorUpdateDTO;
-import com.ubs.ubs.entities.Doctor;
-import com.ubs.ubs.entities.HealthUnit;
-import com.ubs.ubs.entities.Staff;
-import com.ubs.ubs.entities.User;
+import com.ubs.ubs.entities.*;
 import com.ubs.ubs.repositories.DoctorRepository;
 import com.ubs.ubs.repositories.HealthUnitRepository;
 import com.ubs.ubs.repositories.RoleRepository;
@@ -72,6 +69,13 @@ public class DoctorService {
         if (user.hasRole("ROLE_STAFF")){
             Staff staff = (Staff) user;
             return doctorRepository.findByHealthUnitId(staff.getHealthUnit().getId()).stream()
+                    .map(DoctorResponseDTO::new)
+                    .toList();
+        }
+
+        if(user.hasRole("ROLE_PATIENT")){
+            Patient patient = (Patient) user;
+            return doctorRepository.findByHealthUnitId(patient.getHealthUnit().getId()).stream()
                     .map(DoctorResponseDTO::new)
                     .toList();
         }

@@ -73,6 +73,13 @@ public class AppointmentController {
         return ResponseEntity.ok().body(service.concludeAppointment(id, dto));
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_UNIT', 'ROLE_PATIENT')")
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<AppointmentGetDTO> cancelAppointment(
+            @PathVariable Long id) {
+        return ResponseEntity.ok().body(service.cancelAppointment(id));
+    }
+
     @PreAuthorize("hasAnyRole('ROLE_UNIT', 'ROLE_STAFF')")
     @GetMapping("/week-summary")
     public ResponseEntity<Map<String, Long>> getAppointmentsWeekSummary() {

@@ -12,6 +12,7 @@ import com.ubs.ubs.services.exceptions.CustomNotFoundException;
 import com.ubs.ubs.services.exceptions.ForbiddenException;
 import com.ubs.ubs.services.utils.ServiceErrorMessages;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.AccessDeniedException;
@@ -482,5 +483,19 @@ public class AppointmentService {
         return appointments.stream()
                 .map(AppointmentGetDTO::new) // Certifique-se que o DTO é adequado
                 .collect(Collectors.toList());
+    }
+
+    public AppointmentGetDTO cancelAppointment(Long id) {
+        System.out.println("Entrou no cancel");
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
+
+        if (!appointment.getPatient().getId().equals(userService.getCurrentUser().getId())) {
+            throw new AccessDeniedException("Doctor not authorized for this appointment");
+        }
+
+        appointment.setState(AppointmentState.CANCELADO);
+
+        return new AppointmentGetDTO(appointmentRepository.save(appointment));
     }
 }
