@@ -486,11 +486,11 @@ public class AppointmentService {
     }
 
     public AppointmentGetDTO cancelAppointment(Long id) {
-        System.out.println("Entrou no cancel");
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
 
-        if (!appointment.getPatient().getId().equals(userService.getCurrentUser().getId())) {
+        User user = userService.getCurrentUser();
+        if (user instanceof Doctor && !appointment.getPatient().getId().equals(userService.getCurrentUser().getId())) {
             throw new AccessDeniedException("Doctor not authorized for this appointment");
         }
 
@@ -498,4 +498,41 @@ public class AppointmentService {
 
         return new AppointmentGetDTO(appointmentRepository.save(appointment));
     }
+
+    public List<AppointmentGetDTO> findAllForCalendarView(Instant start, Instant end) {
+        User currentUser = userService.getCurrentUser();
+        if (currentUser.hasRole("ROLE_DOCTOR")) {
+            if (start == null || end == null) {
+                return appointmentRepository.findByDoctorId(currentUser.getId()).stream()
+                        .map(AppointmentGetDTO::new)
+                        .collect(Collectors.toList());
+            }
+            return appointmentRepository.findByDoctorIdAndDateBetween(currentUser.getId(), start, end).stream()
+                    .map(AppointmentGetDTO::new)
+                    .collect(Collectors.toList());
+        } else if (currentUser.hasRole("ROLE_STAFF") || currentUser.hasRole("ROLE_UNIT")) {
+            HealthUnit unit = null;
+            if(currentUser instanceof Staff staff){
+                unit = staff.getHealthUnit();
+            }
+            if(currentUser instanceof HealthUnit healthUnit){
+                unit = healthUnit;
+            }
+
+            if (unit == null) {
+                // Lançar exceção ou retornar lista vazia se o staff/unit não tiver unidade associada
+                return Collections.emptyList();
+            }
+            if (start == null || end == null) {
+                return appointmentRepository.findByDoctorHealthUnit(unit).stream()
+                        .map(AppointmentGetDTO::new)
+                        .collect(Collectors.toList());
+            }
+            return appointmentRepository.findByDoctorHealthUnitAndDateBetween(unit, start, end).stream()
+                    .map(AppointmentGetDTO::new)
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
+
 }

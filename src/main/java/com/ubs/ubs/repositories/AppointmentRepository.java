@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
@@ -61,4 +62,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("healthUnit") HealthUnit healthUnit,
             @Param("startDateTime") Instant startDateTime,
             @Param("endDateTime") Instant endDateTime);
+
+    List<Appointment> findByDoctorIdAndDateBetween(Long id, Instant start, Instant end);
+
+    List<Appointment> findByDoctorHealthUnit(HealthUnit unit);
+
+    List<Appointment> findByDoctorHealthUnitAndDateBetween(HealthUnit unit, Instant start, Instant end);
 }

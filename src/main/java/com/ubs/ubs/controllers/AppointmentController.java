@@ -8,12 +8,14 @@ import com.ubs.ubs.entities.Appointment;
 import com.ubs.ubs.services.AppointmentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -73,7 +75,7 @@ public class AppointmentController {
         return ResponseEntity.ok().body(service.concludeAppointment(id, dto));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_UNIT', 'ROLE_PATIENT')")
+    @PreAuthorize("hasAnyRole('ROLE_UNIT', 'ROLE_PATIENT', 'ROLE_STAFF')")
     @PatchMapping("/{id}/cancel")
     public ResponseEntity<AppointmentGetDTO> cancelAppointment(
             @PathVariable Long id) {
@@ -92,5 +94,14 @@ public class AppointmentController {
     public ResponseEntity<List<AppointmentGetDTO>> getTodaysAppointments() {
         List<AppointmentGetDTO> todaysAppointments = service.getTodaysAppointmentsForCurrentUserUnit();
         return ResponseEntity.ok(todaysAppointments);
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_UNIT', 'ROLE_STAFF', 'ROLE_DOCTOR')") // Ajuste as roles
+    @GetMapping("/calendar")
+    public ResponseEntity<List<AppointmentGetDTO>> findAllForCalendar(
+            @RequestParam(value = "start", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant start,
+            @RequestParam(value = "end", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant end) {
+        List<AppointmentGetDTO> appointments = service.findAllForCalendarView(start, end);
+        return ResponseEntity.ok(appointments);
     }
 }
