@@ -535,4 +535,7 @@ public class AppointmentService {
         return Collections.emptyList();
     }
 
+    public void deleteById(Long id) {
+        appointmentRepository.deleteById(id);
+    }
 }
